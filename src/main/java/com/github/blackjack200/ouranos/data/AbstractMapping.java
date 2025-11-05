@@ -25,16 +25,16 @@ public class AbstractMapping {
     }
 
     protected static InputStream open(String file) {
-        return Ouranos.class.getClassLoader().getResourceAsStream(file);
+        return ProtocolInfo.class.getClassLoader().getResourceAsStream(file);
     }
 
     protected static String lookupAvailableFile(String file, int protocolId) {
-        var exists = ProtocolInfo.getPacketCodecs().stream().filter(id -> Ouranos.class.getClassLoader().getResource("vanilla/v" + id.getProtocolVersion() + "/" + file) != null).toList();
+        var exists = ProtocolInfo.getPacketCodecs().stream().filter(id -> ProtocolInfo.class.getClassLoader().getResource("vanilla/v" + id.getProtocolVersion() + "/" + file) != null).toList();
         String name = "vanilla/v" + protocolId + "/" + file;
-        if (Ouranos.class.getClassLoader().getResource(name) == null) {
+        if (ProtocolInfo.class.getClassLoader().getResource(name) == null) {
             name = file;
         }
-        if (Ouranos.class.getClassLoader().getResource(name) == null) {
+        if (ProtocolInfo.class.getClassLoader().getResource(name) == null) {
             for (var i = exists.size() - 1; i >= 0; i--) {
                 var codecc = exists.get(i);
                 name = "vanilla/v" + codecc.getProtocolVersion() + "/" + file;
@@ -43,7 +43,7 @@ public class AbstractMapping {
                 }
             }
         }
-        if (Ouranos.class.getClassLoader().getResource(name) == null) {
+        if (ProtocolInfo.class.getClassLoader().getResource(name) == null) {
             name = file;
         }
         return name;
@@ -67,7 +67,7 @@ public class AbstractMapping {
                     }
                 }
             }
-            var url = Ouranos.class.getClassLoader().getResource(name);
+            var url = ProtocolInfo.class.getClassLoader().getResource(name);
             //log.info("Loading packet codec {} from {}", codec.getProtocolVersion(), file);
             handler.accept(protocolId, url);
             // log.info("Loaded packet codec {} from {}", codec.getProtocolVersion(), file);

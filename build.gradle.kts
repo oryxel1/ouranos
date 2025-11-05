@@ -26,4 +26,6 @@ dependencies {
     api(libs.com.google.code.gson.gson)
     api(libs.com.nimbusds.nimbus.jose.jwt)
     api(libs.net.minecrell.terminalconsoleappender)
+
+    annotationProcessor(libs.org.projectlombok.lombok)
 }

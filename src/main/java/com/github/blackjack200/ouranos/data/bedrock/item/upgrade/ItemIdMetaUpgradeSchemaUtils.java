@@ -1,5 +1,6 @@
 package com.github.blackjack200.ouranos.data.bedrock.item.upgrade;
 
+import com.github.blackjack200.ouranos.ProtocolInfo;
 import com.github.blackjack200.ouranos.data.bedrock.item.upgrade.model.ItemIdMetaUpgradeSchemaModel;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -24,7 +25,7 @@ public class ItemIdMetaUpgradeSchemaUtils {
 
     public static Map<Integer, ItemIdMetaUpgradeSchema> loadSchemas(String path, int maxSchemaId) throws IOException {
         var result = new TreeMap<Integer, ItemIdMetaUpgradeSchema>();
-        var resourceUrl = Ouranos.class.getClassLoader().getResource(path);
+        var resourceUrl = ProtocolInfo.class.getClassLoader().getResource(path);
 
         if (resourceUrl == null) {
             throw new IOException("The specified path does not exist: " + path);
