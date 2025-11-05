@@ -19,6 +19,8 @@ import org.cloudburstmc.protocol.bedrock.data.GameType;
 import org.cloudburstmc.protocol.bedrock.packet.*;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public abstract class OuranosSession {
     @Getter @Setter
@@ -27,7 +29,7 @@ public abstract class OuranosSession {
     private final int protocolId, targetVersion;
     public int prevFormId;
 
-    private final Map<Class<?>, OuranosStorage> storages = new HashMap<>();
+    private final Map<Class<?>, OuranosStorage> storages = new ConcurrentHashMap<>();
 
     public void put(OuranosStorage storage) {
         this.storages.put(storage.getClass(), storage);
@@ -37,7 +39,7 @@ public abstract class OuranosSession {
         return (T) this.storages.get(klass);
     }
 
-    private final List<BaseTranslator> translators = new ArrayList<>();
+    private final List<BaseTranslator> translators = new CopyOnWriteArrayList<>();
     public void put(BaseTranslator translator) {
         this.translators.add(translator);
     }
