@@ -3,6 +3,7 @@ package com.github.blackjack200.ouranos.session;
 import com.github.blackjack200.ouranos.session.storage.OuranosStorage;
 import com.github.blackjack200.ouranos.session.translator.BaseTranslator;
 import com.github.blackjack200.ouranos.session.translator.impl.TranslatorsAdder;
+import com.github.blackjack200.ouranos.translators.ItemRewriterTranslator;
 import lombok.Getter;
 import org.cloudburstmc.nbt.NbtMap;
 import org.cloudburstmc.protocol.bedrock.codec.v389.Bedrock_v389;
@@ -88,8 +89,8 @@ public class OuranosSession {
         this.translators.add(new TranslatorsAdder());
         this.translators.add(new BaseTranslator() {
             @Override
-            public BedrockPacket translateClientbound(OuranosSession session, BedrockPacket pk) {
-                if (pk instanceof StartGamePacket packet) {
+            public BedrockPacket translateClientbound(OuranosSession session, BedrockPacket bedrockPacket) {
+                if (bedrockPacket instanceof StartGamePacket packet) {
                     packet.setBlockRegistryChecksum(0);
                     packet.setServerId(Optional.ofNullable(packet.getServerId()).orElse(""));
                     packet.setWorldId(Optional.ofNullable(packet.getWorldId()).orElse(""));
@@ -99,14 +100,25 @@ public class OuranosSession {
                     packet.setWorldTemplateId(Optional.ofNullable(packet.getWorldTemplateId()).orElse(UUID.randomUUID()));
                     packet.setOwnerId(Objects.requireNonNullElse(packet.getOwnerId(), ""));
                     packet.setAuthoritativeMovementMode(Objects.requireNonNullElse(packet.getAuthoritativeMovementMode(), AuthoritativeMovementMode.SERVER_WITH_REWIND));
-                } else if (pk instanceof AddPlayerPacket packet) {
+                } else if (bedrockPacket instanceof AddPlayerPacket packet) {
                     packet.setGameType(Optional.ofNullable(packet.getGameType()).orElse(GameType.DEFAULT));
-                } else if (pk instanceof ResourcePacksInfoPacket packet) {
+                } else if (bedrockPacket instanceof ResourcePacksInfoPacket packet) {
                     packet.setWorldTemplateId(Objects.requireNonNullElseGet(packet.getWorldTemplateId(), UUID::randomUUID));
                     packet.setWorldTemplateVersion(Objects.requireNonNullElse(packet.getWorldTemplateVersion(), "0.0.0"));
+                } else if (bedrockPacket instanceof ResourcePackStackPacket packet) {
+                    packet.setGameVersion("*");
                 }
 
-                return pk;
+                return bedrockPacket;
+            }
+
+            @Override
+            public BedrockPacket translateServerbound(OuranosSession session, BedrockPacket bedrockPacket) {
+                if (bedrockPacket instanceof ClientCacheStatusPacket packet) {
+                    packet.setSupported(false);
+                }
+
+                return bedrockPacket;
             }
         });
 
@@ -133,6 +145,8 @@ public class OuranosSession {
                 }
             });
         }
+
+        this.translators.add(new ItemRewriterTranslator());
     }
 
     public BedrockPacket translateServerbound(BedrockPacket packet) {

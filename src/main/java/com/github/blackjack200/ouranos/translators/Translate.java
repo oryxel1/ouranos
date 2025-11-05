@@ -5,7 +5,6 @@ import com.github.blackjack200.ouranos.converter.ChunkRewriteException;
 import com.github.blackjack200.ouranos.converter.ItemTypeDictionary;
 import com.github.blackjack200.ouranos.converter.TypeConverter;
 import com.github.blackjack200.ouranos.converter.biome.BiomeDefinitionRegistry;
-import com.github.blackjack200.ouranos.session.OuranosProxySession;
 import com.github.blackjack200.ouranos.utils.SimpleBlockDefinition;
 import io.netty.buffer.AbstractByteBufAllocator;
 import io.netty.util.ReferenceCountUtil;
@@ -68,22 +67,14 @@ public class Translate {
         if (input == output) {
             return List.of(p);
         }
-        if (p instanceof ResourcePackStackPacket pk) {
-            pk.setGameVersion("*");
-        } else if (p instanceof ClientCacheStatusPacket pk) {
-            //TODO forcibly disable client blob caches for security
-            pk.setSupported(false);
-        }
 
         var list = new HashSet<BedrockPacket>();
         list.add(p);
 
         rewriteProtocol(input, output, fromServer, player, p, list);
-        rewriteItem(input, output, p, list);
         rewriteBlock(input, output, player, p, list);
         rewriteChunk(input, output, player, p, list);
 
-        MovementTranslator.rewriteMovement(input, output, fromServer, player, p, list);
         InventoryTranslator.rewriteInventory(input, output, fromServer, player, p, list);
         if (output >= Bedrock_v554.CODEC.getProtocolVersion()) {
             list.removeIf((b) -> b instanceof AdventureSettingsPacket);
@@ -92,130 +83,6 @@ public class Translate {
             list.removeIf((b) -> b instanceof EntityFallPacket);
         }
         return list;
-    }
-
-    private static void rewriteItem(int input, int output, BedrockPacket p, Collection<BedrockPacket> list) {
-        if (p instanceof InventoryContentPacket pk) {
-            val contents = new ArrayList<>(pk.getContents());
-            contents.replaceAll(itemData -> TypeConverter.translateItemData(input, output, itemData));
-            pk.setContents(contents);
-        } else if (p instanceof CraftingDataPacket pk) {
-           /* var newCraftingData = new ArrayList<RecipeData>(pk.getCraftingData().size());
-            for (var d : pk.getCraftingData()) {
-                try {
-                    newCraftingData.add(translateRecipeData(input, output, d));
-                } catch (NullPointerException e) {
-                    e.printStackTrace();
-                }
-            }
-           // pk.getCraftingData().clear();
-           // pk.getCraftingData().addAll(newCraftingData);
-           // pk.getContainerMixData().clear();
-           // pk.getMaterialReducers().clear();
-           // pk.getPotionMixData().clear();
-             pk.setCleanRecipes(true);*/
-            pk.getPotionMixData().clear();
-            pk.getMaterialReducers().clear();
-            pk.getCraftingData().clear();
-            pk.getContainerMixData().clear();
-            pk.setCleanRecipes(true);
-        } else if (p instanceof CreativeContentPacket pk) {
-            val contents = new ArrayList<CreativeItemData>();
-            for (int i = 0, iMax = pk.getContents().size(); i < iMax; i++) {
-                var old = pk.getContents().get(i);
-                var item = TypeConverter.translateCreativeItemData(input, output, old);
-                contents.add(item);
-            }
-            pk.getContents().clear();
-            if (input < output && output < Bedrock_v776.CODEC.getProtocolVersion()) {
-                pk.getContents().addAll(contents);
-            }
-            if (input >= output) {
-                pk.getContents().addAll(contents);
-            }
-            val groups = new ArrayList<CreativeItemGroup>();
-            for (var group : pk.getGroups()) {
-                groups.add(group.toBuilder().icon(TypeConverter.translateItemData(input, output, group.getIcon())).build());
-            }
-            pk.getGroups().clear();
-            pk.getGroups().addAll(groups);
-        } else if (p instanceof AddItemEntityPacket pk) {
-            pk.setItemInHand(TypeConverter.translateItemData(input, output, pk.getItemInHand()));
-        } else if (p instanceof InventorySlotPacket pk) {
-            pk.setItem(TypeConverter.translateItemData(input, output, pk.getItem()));
-            pk.setStorageItem(TypeConverter.translateItemData(input, output, pk.getStorageItem()));
-        } else if (p instanceof InventoryTransactionPacket pk) {
-            var newActions = new ArrayList<InventoryActionData>(pk.getActions().size());
-            for (var action : pk.getActions()) {
-                newActions.add(new InventoryActionData(action.getSource(), action.getSlot(), TypeConverter.translateItemData(input, output, action.getFromItem()), TypeConverter.translateItemData(input, output, action.getToItem()), action.getStackNetworkId()));
-            }
-            pk.getActions().clear();
-            pk.getActions().addAll(newActions);
-
-            if (pk.getBlockDefinition() != null) {
-                pk.setBlockDefinition(TypeConverter.translateBlockDefinition(input, output, pk.getBlockDefinition()));
-            }
-            if (pk.getItemInHand() != null) {
-                pk.setItemInHand(TypeConverter.translateItemData(input, output, pk.getItemInHand()));
-            }
-        } else if (p instanceof MobEquipmentPacket pk) {
-            pk.setItem(TypeConverter.translateItemData(input, output, pk.getItem()));
-        } else if (p instanceof MobArmorEquipmentPacket pk) {
-            if (pk.getBody() != null) {
-                pk.setBody(TypeConverter.translateItemData(input, output, pk.getBody()));
-            }
-            pk.setChestplate(TypeConverter.translateItemData(input, output, pk.getChestplate()));
-            pk.setHelmet(TypeConverter.translateItemData(input, output, pk.getHelmet()));
-            pk.setBoots(TypeConverter.translateItemData(input, output, pk.getBoots()));
-            pk.setLeggings(TypeConverter.translateItemData(input, output, pk.getLeggings()));
-        } else if (p instanceof AddPlayerPacket pk) {
-            pk.setHand(TypeConverter.translateItemData(input, output, pk.getHand()));
-        }
-    }
-
-    private static RecipeData translateRecipeData(int input, int output, RecipeData d) {
-        if (d instanceof ShapelessRecipeData da) {
-            var newIngredients = da.getIngredients().stream().map((i) -> translateItemDescriptorWithCount(input, output, i)).filter(Objects::nonNull).toList();
-            da.getIngredients().clear();
-            da.getIngredients().addAll(newIngredients);
-            var newResults = da.getResults().stream().map((i) -> TypeConverter.translateItemData(input, output, i)).filter(Objects::nonNull).toList();
-            da.getResults().clear();
-            da.getResults().addAll(newResults);
-            return da;
-        }
-        if (d instanceof FurnaceRecipeData da) {
-            return FurnaceRecipeData.of(da.getType(), da.getInputId(), da.getInputData(), da.getResult(), da.getTag());
-        } else if (d instanceof MultiRecipeData da) {
-            return da;
-        } else if (d instanceof ShapedRecipeData da) {
-            var newIngredients = da.getIngredients().stream().map((i) -> translateItemDescriptorWithCount(input, output, i)).filter(Objects::nonNull).toList();
-            da.getIngredients().clear();
-            da.getIngredients().addAll(newIngredients);
-            var newResults = da.getResults().stream().map((i) -> TypeConverter.translateItemData(input, output, i)).filter(Objects::nonNull).toList();
-            da.getResults().clear();
-            da.getResults().addAll(newResults);
-            return da;
-        } else if (d instanceof SmithingTransformRecipeData da) {
-            return SmithingTransformRecipeData.of(
-                    da.getId(),
-                    translateItemDescriptorWithCount(input, output, da.getTemplate()),
-                    translateItemDescriptorWithCount(input, output, da.getBase()),
-                    translateItemDescriptorWithCount(input, output, da.getAddition()),
-                    TypeConverter.translateItemData(input, output, da.getResult()),
-                    da.getTag(),
-                    da.getNetId()
-            );
-        } else if (d instanceof SmithingTrimRecipeData da) {
-            return SmithingTrimRecipeData.of(
-                    da.getId(),
-                    translateItemDescriptorWithCount(input, output, da.getTemplate()),
-                    translateItemDescriptorWithCount(input, output, da.getBase()),
-                    translateItemDescriptorWithCount(input, output, da.getAddition()),
-                    da.getTag(),
-                    da.getNetId()
-            );
-        }
-        throw new RuntimeException("Unknown recipe type " + d.getType());
     }
 
     private static ItemDescriptorWithCount translateItemDescriptorWithCount(int input, int output, ItemDescriptorWithCount i) {
@@ -227,7 +94,6 @@ public class Translate {
     }
 
     private static void rewriteProtocol(int input, int output, boolean fromServer, OuranosProxySession player, BedrockPacket p, Collection<BedrockPacket> list) {
-        writeProtocolDefault(player, p);
         if (p instanceof StartGamePacket pk) {
             if (output >= Bedrock_v776.CODEC.getProtocolVersion()) {
                 var newPk = new ItemComponentPacket();

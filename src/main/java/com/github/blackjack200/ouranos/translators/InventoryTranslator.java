@@ -1,6 +1,5 @@
 package com.github.blackjack200.ouranos.translators;
 
-import com.github.blackjack200.ouranos.session.OuranosProxySession;
 import lombok.extern.log4j.Log4j2;
 import org.cloudburstmc.protocol.bedrock.codec.v407.Bedrock_v407;
 import org.cloudburstmc.protocol.bedrock.data.inventory.*;
