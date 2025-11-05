@@ -4,6 +4,7 @@ import com.github.blackjack200.ouranos.session.storage.OuranosStorage;
 import com.github.blackjack200.ouranos.session.translator.BaseTranslator;
 import com.github.blackjack200.ouranos.session.translator.impl.TranslatorsAdder;
 import com.github.blackjack200.ouranos.translators.AdventureSettingsTranslator;
+import com.github.blackjack200.ouranos.translators.EntityMetadataTranslator;
 import com.github.blackjack200.ouranos.translators.WorldTranslator;
 import com.github.blackjack200.ouranos.translators.inventory.ItemRewriterTranslator;
 import com.github.blackjack200.ouranos.translators.ProtocolRewriterTranslator;
@@ -155,6 +156,10 @@ public abstract class OuranosSession {
         this.translators.add(new AdventureSettingsTranslator());
         this.translators.add(new ItemRewriterTranslator());
         this.translators.add(new WorldTranslator());
+
+        if (this.getProtocolId() < this.getTargetVersion()) {
+            this.translators.add(new EntityMetadataTranslator(this));
+        }
     }
 
     public abstract void sendUpstreamPacket(BedrockPacket packet);
