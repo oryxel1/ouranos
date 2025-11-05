@@ -91,7 +91,7 @@ public class ProtocolRewriterTranslator implements BaseTranslator {
             List<ItemDefinition> def = ItemTypeDictionary.getInstance(output).getEntries().entrySet().stream().<ItemDefinition>map((e) -> e.getValue().toDefinition(e.getKey())).toList();
             componentPacket.getItems().addAll(def);
 
-            session.sendUpstreamPacket(packet);
+            session.sendUpstreamPacket(componentPacket);
         }
         if (bedrockPacket instanceof ItemStackResponsePacket packet && input >= Bedrock_v419.CODEC.getProtocolVersion() && output < Bedrock_v419.CODEC.getProtocolVersion()) {
             final List<ItemStackResponse> translated = packet.getEntries().stream().map((entry) -> {
