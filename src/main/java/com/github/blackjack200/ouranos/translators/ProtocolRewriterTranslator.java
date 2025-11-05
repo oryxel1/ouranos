@@ -40,7 +40,7 @@ import java.util.List;
 public class ProtocolRewriterTranslator implements BaseTranslator {
     @Override
     public BedrockPacket translateClientbound(OuranosSession session, BedrockPacket bedrockPacket) {
-        final int input = session.getProtocolId(), output = session.getTargetVersion();
+        final int input = session.getTargetVersion(), output = session.getProtocolId();
 
         if (bedrockPacket instanceof BiomeDefinitionListPacket packet) {
             // TODO fix biome for v800
@@ -101,7 +101,7 @@ public class ProtocolRewriterTranslator implements BaseTranslator {
             packet.getEntries().addAll(translated);
         }
 
-        return translateBothWay(session, bedrockPacket);
+        return translateBothWay(session, bedrockPacket, input, output);
     }
 
     @Override
@@ -150,12 +150,10 @@ public class ProtocolRewriterTranslator implements BaseTranslator {
             packet.getRequests().addAll(newRequests);
         }
 
-        return translateBothWay(session, bedrockPacket);
+        return translateBothWay(session, bedrockPacket, input, output);
     }
 
-    private BedrockPacket translateBothWay(OuranosSession session, final BedrockPacket bedrockPacket) {
-        final int input = session.getProtocolId(), output = session.getTargetVersion();
-
+    private BedrockPacket translateBothWay(OuranosSession session, final BedrockPacket bedrockPacket, int input, int output) {
         if (bedrockPacket instanceof PlayerSkinPacket packet && ProtocolInfo.getPacketCodec(output) != null) {
             packet.setSkin(packet.getSkin().toBuilder().geometryDataEngineVersion(ProtocolInfo.getPacketCodec(output).getMinecraftVersion()).build());
         } else if (input < Bedrock_v685.CODEC.getProtocolVersion() && bedrockPacket instanceof ContainerClosePacket packet) {

@@ -15,8 +15,10 @@ import java.util.List;
 public class ItemRewriterTranslator implements BaseTranslator {
     @Override
     public BedrockPacket translateClientbound(OuranosSession session, BedrockPacket bedrockPacket) {
+        final int input = session.getTargetVersion(), output = session.getProtocolId();
+
         if (bedrockPacket instanceof InventoryContentPacket packet) {
-            packet.getContents().replaceAll(itemData -> TypeConverter.translateItemData(session.getProtocolId(), session.getTargetVersion(), itemData));
+            packet.getContents().replaceAll(itemData -> TypeConverter.translateItemData(input, output, itemData));
         } else if (bedrockPacket instanceof CraftingDataPacket packet) {
             packet.getPotionMixData().clear();
             packet.getMaterialReducers().clear();
@@ -27,7 +29,7 @@ public class ItemRewriterTranslator implements BaseTranslator {
             final List<CreativeItemData> contents = new ArrayList<>();
             for (int i = 0; i < packet.getContents().size(); i++) {
                 var old = packet.getContents().get(i);
-                var item = TypeConverter.translateCreativeItemData(session.getProtocolId(), session.getTargetVersion(), old);
+                var item = TypeConverter.translateCreativeItemData(input, output, old);
                 contents.add(item);
             }
             packet.getContents().clear();
@@ -36,46 +38,46 @@ public class ItemRewriterTranslator implements BaseTranslator {
             }
             final List<CreativeItemGroup> groups = new ArrayList<>();
             for (var group : packet.getGroups()) {
-                groups.add(group.toBuilder().icon(TypeConverter.translateItemData(session.getProtocolId(), session.getTargetVersion(), group.getIcon())).build());
+                groups.add(group.toBuilder().icon(TypeConverter.translateItemData(input, output, group.getIcon())).build());
             }
             packet.getGroups().clear();
             packet.getGroups().addAll(groups);
         } else if (bedrockPacket instanceof AddItemEntityPacket packet) {
-            packet.setItemInHand(TypeConverter.translateItemData(session.getProtocolId(), session.getTargetVersion(), packet.getItemInHand()));
+            packet.setItemInHand(TypeConverter.translateItemData(input, output, packet.getItemInHand()));
         } else if (bedrockPacket instanceof InventorySlotPacket packet) {
-            packet.setItem(TypeConverter.translateItemData(session.getProtocolId(), session.getTargetVersion(), packet.getItem()));
-            packet.setStorageItem(TypeConverter.translateItemData(session.getProtocolId(), session.getTargetVersion(), packet.getStorageItem()));
+            packet.setItem(TypeConverter.translateItemData(input, output, packet.getItem()));
+            packet.setStorageItem(TypeConverter.translateItemData(input, output, packet.getStorageItem()));
         } else if (bedrockPacket instanceof AddPlayerPacket packet) {
-            packet.setHand(TypeConverter.translateItemData(session.getProtocolId(), session.getTargetVersion(), packet.getHand()));
+            packet.setHand(TypeConverter.translateItemData(input, output, packet.getHand()));
         }
 
-        return translateBothWay(session, bedrockPacket);
+        return translateBothWay(session, bedrockPacket, input, output);
     }
 
     @Override
     public BedrockPacket translateServerbound(OuranosSession session, BedrockPacket bedrockPacket) {
-        return translateBothWay(session, bedrockPacket);
+        final int input = session.getProtocolId(), output = session.getTargetVersion();
+        return translateBothWay(session, bedrockPacket, input, output);
     }
 
-    private BedrockPacket translateBothWay(OuranosSession session, final BedrockPacket bedrockPacket) {
+    private BedrockPacket translateBothWay(OuranosSession session, final BedrockPacket bedrockPacket, int input, int output) {
         if (bedrockPacket instanceof InventoryTransactionPacket packet) {
             final List<InventoryActionData> newActions = new ArrayList<>(packet.getActions().size());
             for (var action : packet.getActions()) {
-                newActions.add(new InventoryActionData(action.getSource(), action.getSlot(), TypeConverter.translateItemData(session.getProtocolId(), session.getTargetVersion(), action.getFromItem()), TypeConverter.translateItemData(session.getProtocolId(), session.getTargetVersion(), action.getToItem()), action.getStackNetworkId()));
+                newActions.add(new InventoryActionData(action.getSource(), action.getSlot(), TypeConverter.translateItemData(input, output, action.getFromItem()), TypeConverter.translateItemData(input, output, action.getToItem()), action.getStackNetworkId()));
             }
             packet.getActions().clear();
             packet.getActions().addAll(newActions);
 
             if (packet.getBlockDefinition() != null) {
-                packet.setBlockDefinition(TypeConverter.translateBlockDefinition(session.getProtocolId(), session.getTargetVersion(), packet.getBlockDefinition()));
+                packet.setBlockDefinition(TypeConverter.translateBlockDefinition(input, output, packet.getBlockDefinition()));
             }
             if (packet.getItemInHand() != null) {
-                packet.setItemInHand(TypeConverter.translateItemData(session.getProtocolId(), session.getTargetVersion(), packet.getItemInHand()));
+                packet.setItemInHand(TypeConverter.translateItemData(input, output, packet.getItemInHand()));
             }
         } else if (bedrockPacket instanceof MobEquipmentPacket packet) {
-            packet.setItem(TypeConverter.translateItemData(session.getProtocolId(), session.getTargetVersion(), packet.getItem()));
+            packet.setItem(TypeConverter.translateItemData(input, output, packet.getItem()));
         } else if (bedrockPacket instanceof MobArmorEquipmentPacket packet) {
-            final int input = session.getProtocolId(), output = session.getTargetVersion();
             if (packet.getBody() != null) {
                 packet.setBody(TypeConverter.translateItemData(input, output, packet.getBody()));
             }

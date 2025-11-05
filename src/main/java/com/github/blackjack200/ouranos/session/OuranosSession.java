@@ -159,7 +159,7 @@ public abstract class OuranosSession {
         this.translators.add(new ItemRewriterTranslator());
         this.translators.add(new WorldTranslator());
 
-        if (this.getProtocolId() < this.getTargetVersion()) {
+        if (this.protocolId < this.targetVersion) {
             this.translators.add(new EntityMetadataTranslator(this));
         }
     }

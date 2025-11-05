@@ -21,7 +21,7 @@ import java.util.ArrayList;
 public class WorldTranslator implements BaseTranslator {
     @Override
     public BedrockPacket translateClientbound(OuranosSession session, BedrockPacket bedrockPacket) {
-        final int input = session.getProtocolId(), output = session.getTargetVersion();
+        final int input = session.getTargetVersion(), output = session.getProtocolId();
 
         if (bedrockPacket instanceof UpdateBlockPacket packet) {
             var runtimeId = packet.getDefinition().getRuntimeId();

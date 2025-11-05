@@ -43,7 +43,7 @@ public class ClientMovementTranslator implements BaseTranslator {
             storage.setPosition(packet.getPosition());
             storage.setRotation(packet.getRotation());
 
-            if (packet.isOnGround() && session.getTargetVersion() >= Bedrock_v729.CODEC.getProtocolVersion()) {
+            if (packet.isOnGround()) {
                 storage.getInputData().add(PlayerAuthInputData.VERTICAL_COLLISION);
             }
 

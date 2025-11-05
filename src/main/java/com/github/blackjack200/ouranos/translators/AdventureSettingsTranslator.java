@@ -20,29 +20,29 @@ import java.util.function.BiFunction;
 public class AdventureSettingsTranslator implements BaseTranslator {
     @Override
     public BedrockPacket translateServerbound(OuranosSession session, BedrockPacket bedrockPacket) {
+        final int output = session.getTargetVersion();
         if (bedrockPacket instanceof RequestAbilityPacket packet) {
-            return rewriteFlying(session, packet.getAbility() == Ability.FLYING);
+            return rewriteFlying(output, session, packet.getAbility() == Ability.FLYING);
         }
         if (bedrockPacket instanceof AdventureSettingsPacket packet) {
-            return rewriteFlying(session, packet.getSettings().contains(AdventureSetting.FLYING));
+            return rewriteFlying(output, session, packet.getSettings().contains(AdventureSetting.FLYING));
         }
 
-        final int output = session.getTargetVersion();
         if (output < Bedrock_v618.CODEC.getProtocolVersion() && bedrockPacket instanceof PlayerActionPacket packet) {
             if (packet.getAction() == PlayerActionType.START_FLYING) {
-                rewriteFlying(session, true);
+                rewriteFlying(output, session, true);
             }
             if (packet.getAction() == PlayerActionType.STOP_FLYING) {
-                rewriteFlying(session, false);
+                rewriteFlying(output, session, false);
             }
         }
 
-        return translateBothWay(session, bedrockPacket);
+        return translateBothWay(session, bedrockPacket, output);
     }
 
     @Override
     public BedrockPacket translateClientbound(OuranosSession session, BedrockPacket bedrockPacket) {
-        final int output = session.getTargetVersion();
+        final int output = session.getProtocolId();
         if (output > Bedrock_v554.CODEC.getProtocolVersion() && bedrockPacket instanceof AdventureSettingsPacket packet) {
             var newPk = new UpdateAbilitiesPacket();
             newPk.setUniqueEntityId(packet.getUniqueEntityId());
@@ -87,11 +87,10 @@ public class AdventureSettingsTranslator implements BaseTranslator {
             return null;
         }
 
-        return translateBothWay(session, bedrockPacket);
+        return translateBothWay(session, bedrockPacket, output);
     }
 
-    private BedrockPacket translateBothWay(OuranosSession session, final BedrockPacket bedrockPacket) {
-        final int output = session.getTargetVersion();
+    private BedrockPacket translateBothWay(OuranosSession session, final BedrockPacket bedrockPacket, int output) {
         if (output < Bedrock_v534.CODEC.getProtocolVersion() && bedrockPacket instanceof UpdateAbilitiesPacket packet) {
             final AdventureSettingsPacket adventurePacket = new AdventureSettingsPacket();
             adventurePacket.setUniqueEntityId(packet.getUniqueEntityId());
@@ -129,8 +128,8 @@ public class AdventureSettingsTranslator implements BaseTranslator {
         return bedrockPacket;
     }
 
-    private static BedrockPacket rewriteFlying(final OuranosSession session, boolean flying) {
-        if (session.getTargetVersion() < Bedrock_v527.CODEC.getProtocolVersion()) {
+    private static BedrockPacket rewriteFlying(int output, final OuranosSession session, boolean flying) {
+        if (output < Bedrock_v527.CODEC.getProtocolVersion()) {
             final AdventureSettingsPacket packet = new AdventureSettingsPacket();
             packet.setUniqueEntityId(session.getUniqueId());
             if (flying) {

@@ -16,14 +16,13 @@ import org.cloudburstmc.protocol.bedrock.data.inventory.transaction.InventorySou
 import org.cloudburstmc.protocol.bedrock.packet.*;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class InventoryTranslator implements BaseTranslator {
     @Override
     public BedrockPacket translateClientbound(OuranosSession session, BedrockPacket bedrockPacket) {
-        final int output = session.getTargetVersion();
+        final int output = session.getProtocolId();
 
         final ClientInventoryStorage storage = session.get(ClientInventoryStorage.class);
 
