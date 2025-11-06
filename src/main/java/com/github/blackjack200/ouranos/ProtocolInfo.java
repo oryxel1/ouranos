@@ -171,10 +171,6 @@ public final class ProtocolInfo {
         // addPacketCodec(Bedrock_v291.CODEC, 21);
     }
 
-//    public static void main(String[] args) {
-//        getTranslators(Bedrock_v361.CODEC.getProtocolVersion(), Bedrock_v582.CODEC.getProtocolVersion());
-//    }
-
     public static List<ProtocolToProtocol> getTranslators(int target, int client) {
         if (target == client) {
             return List.of();
@@ -188,7 +184,7 @@ public final class ProtocolInfo {
             if (isDescending ? protocolVersion < client : protocolVersion > client) {
                 break;
             }
-            if (isDescending == (protocolVersion >= target)) {
+            if (isDescending == (protocolVersion > target)) {
                 continue;
             }
 
