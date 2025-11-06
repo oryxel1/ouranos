@@ -8,4 +8,4 @@ technical debt. The original project itself is still amazing tho!
 
 ## License
 
-MIT License. See [LICENSE](LICENSE) for details.
+See [LICENSE](LICENSE) for details.
