@@ -83,14 +83,6 @@ public class ProtocolRewriterTranslator implements BaseTranslator {
             packet.setReloadWorld(true);
         }
 
-        if (bedrockPacket instanceof StartGamePacket packet && output >= Bedrock_v776.CODEC.getProtocolVersion()) {
-            final ItemComponentPacket componentPacket = new ItemComponentPacket();
-
-            List<ItemDefinition> def = ItemTypeDictionary.getInstance(output).getEntries().entrySet().stream().<ItemDefinition>map((e) -> e.getValue().toDefinition(e.getKey())).toList();
-            componentPacket.getItems().addAll(def);
-
-            session.sendUpstreamPacket(componentPacket);
-        }
         if (bedrockPacket instanceof ItemStackResponsePacket packet && input >= Bedrock_v419.CODEC.getProtocolVersion() && output < Bedrock_v419.CODEC.getProtocolVersion()) {
             final List<ItemStackResponse> translated = packet.getEntries().stream().map((entry) -> {
                 return new ItemStackResponse(entry.getResult().equals(ItemStackResponseStatus.OK), entry.getRequestId(), entry.getContainers());
@@ -117,35 +109,6 @@ public class ProtocolRewriterTranslator implements BaseTranslator {
         if (input < Bedrock_v712.CODEC.getProtocolVersion() && bedrockPacket instanceof InventoryTransactionPacket packet) {
             packet.setTriggerType(ItemUseTransaction.TriggerType.PLAYER_INPUT);
             packet.setClientInteractPrediction(ItemUseTransaction.PredictedResult.SUCCESS);
-        }
-
-        if (bedrockPacket instanceof ItemStackRequestPacket packet) {
-            final List<ItemStackRequest> newRequests = new ArrayList<>();
-            for (final ItemStackRequest reqest : packet.getRequests()) {
-                List<ItemStackRequestAction> newActions = new ArrayList<ItemStackRequestAction>();
-                final ItemStackRequestAction[] actions = reqest.getActions();
-                for (final ItemStackRequestAction action : actions) {
-                    if (action instanceof TakeAction a) {
-                        newActions.add(new TakeAction(a.getCount(), translateItemStackRequestSlotData(a.getSource()), translateItemStackRequestSlotData(a.getDestination())));
-                    } else if (action instanceof ConsumeAction a) {
-                        newActions.add(new ConsumeAction(a.getCount(), translateItemStackRequestSlotData(a.getSource())));
-                    } else if (action instanceof DestroyAction a) {
-                        newActions.add(new DestroyAction(a.getCount(), translateItemStackRequestSlotData(a.getSource())));
-                    } else if (action instanceof DropAction a) {
-                        newActions.add(new DropAction(a.getCount(), translateItemStackRequestSlotData(a.getSource()), a.isRandomly()));
-                    } else if (action instanceof PlaceAction a) {
-                        final ItemStackRequestAction newAct = new PlaceAction(a.getCount(), translateItemStackRequestSlotData(a.getSource()), translateItemStackRequestSlotData(a.getDestination()));
-                        newActions.add(newAct);
-                    } else if (action instanceof SwapAction a) {
-                        newActions.add(new SwapAction(translateItemStackRequestSlotData(a.getSource()), translateItemStackRequestSlotData(a.getDestination())));
-                    } else {
-                        newActions.add(action);
-                    }
-                }
-                newRequests.add(new ItemStackRequest(reqest.getRequestId(), newActions.toArray(new ItemStackRequestAction[0]), reqest.getFilterStrings()));
-            }
-            packet.getRequests().clear();
-            packet.getRequests().addAll(newRequests);
         }
 
         return translateBothWay(session, bedrockPacket, input, output);
@@ -184,13 +147,5 @@ public class ProtocolRewriterTranslator implements BaseTranslator {
         return build;
     }
 
-    private static ItemStackRequestSlotData translateItemStackRequestSlotData(ItemStackRequestSlotData dest) {
-        return new ItemStackRequestSlotData(
-                dest.getContainer(),
-                dest.getSlot(),
-                dest.getStackNetworkId(),
-                Optional.ofNullable(dest.getContainerName())
-                        .orElse(new FullContainerName(dest.getContainer(), 0))
-        );
-    }
+
 }

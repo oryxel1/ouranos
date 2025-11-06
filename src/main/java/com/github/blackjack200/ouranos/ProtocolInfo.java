@@ -3,6 +3,7 @@ package com.github.blackjack200.ouranos;
 import com.github.blackjack200.ouranos.base.ProtocolToProtocol;
 import com.github.blackjack200.ouranos.data.bedrock.GlobalItemDataHandlers;
 import com.github.blackjack200.ouranos.translators.new_to_old.v560to577.Protocol560to577;
+import com.github.blackjack200.ouranos.translators.old_to_new.v766to776.Protocol766to776;
 import com.github.blackjack200.ouranos.utils.Pair;
 import org.cloudburstmc.protocol.bedrock.codec.BedrockCodec;
 import org.cloudburstmc.protocol.bedrock.codec.BedrockCodecHelper;
@@ -73,7 +74,7 @@ public final class ProtocolInfo {
         addPacketCodec(Bedrock_v800.CODEC, 231);
         addPacketCodec(Bedrock_v786.CODEC, 231);
         addPacketCodec(Bedrock_v776.CODEC, 231);
-        addPacketCodec(Bedrock_v766.CODEC, 231);
+        addPacketCodec(Bedrock_v766.CODEC, 231, null, new Protocol766to776());
         addPacketCodec(Bedrock_v748.CODEC, 221);
         addPacketCodec(Bedrock_v729.CODEC, 211);
         addPacketCodec(Bedrock_v712.CODEC, 201);
