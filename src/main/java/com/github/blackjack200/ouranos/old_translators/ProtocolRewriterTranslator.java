@@ -1,4 +1,4 @@
-package com.github.blackjack200.ouranos.translators;
+package com.github.blackjack200.ouranos.old_translators;
 
 import com.github.blackjack200.ouranos.ProtocolInfo;
 import com.github.blackjack200.ouranos.converter.ItemTypeDictionary;

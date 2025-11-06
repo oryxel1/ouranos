@@ -1,4 +1,4 @@
-package com.github.blackjack200.ouranos.translators.movement;
+package com.github.blackjack200.ouranos.old_translators.movement;
 
 import com.github.blackjack200.ouranos.session.OuranosSession;
 import org.cloudburstmc.math.vector.Vector2f;

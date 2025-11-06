@@ -1,4 +1,4 @@
-package com.github.blackjack200.ouranos.translators.storages;
+package com.github.blackjack200.ouranos.translators.global_storage;
 
 import com.github.blackjack200.ouranos.ProtocolInfo;
 import com.github.blackjack200.ouranos.session.OuranosSession;

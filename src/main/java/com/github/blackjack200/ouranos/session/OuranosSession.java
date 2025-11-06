@@ -1,8 +1,10 @@
 package com.github.blackjack200.ouranos.session;
 
+import com.github.blackjack200.ouranos.ProtocolInfo;
 import com.github.blackjack200.ouranos.base.ProtocolToProtocol;
 import com.github.blackjack200.ouranos.base.WrappedBedrockPacket;
-import com.github.blackjack200.ouranos.protocol.GlobalProtocolTranslator;
+import com.github.blackjack200.ouranos.translators.GlobalProtocolTranslator;
+import com.github.blackjack200.ouranos.translators.GlobalWorldTranslator;
 import com.github.blackjack200.ouranos.session.storage.OuranosStorage;
 import lombok.Getter;
 import lombok.Setter;
@@ -34,6 +36,9 @@ public abstract class OuranosSession {
         this.targetVersion = targetVersion;
 
         this.translators.add(new GlobalProtocolTranslator());
+        this.translators.add(new GlobalWorldTranslator());
+
+        this.translators.addAll(ProtocolInfo.getTranslators(targetVersion, protocolId));
 
         this.translators.forEach(translator -> translator.init(this));
 

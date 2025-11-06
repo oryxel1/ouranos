@@ -1,6 +1,9 @@
 package com.github.blackjack200.ouranos;
 
+import com.github.blackjack200.ouranos.base.ProtocolToProtocol;
 import com.github.blackjack200.ouranos.data.bedrock.GlobalItemDataHandlers;
+import com.github.blackjack200.ouranos.translators.new_to_old.v560to577.Protocol560to577;
+import com.github.blackjack200.ouranos.utils.Pair;
 import org.cloudburstmc.protocol.bedrock.codec.BedrockCodec;
 import org.cloudburstmc.protocol.bedrock.codec.BedrockCodecHelper;
 import org.cloudburstmc.protocol.bedrock.codec.v361.Bedrock_v361;
@@ -53,11 +56,11 @@ import org.cloudburstmc.protocol.bedrock.codec.v827.Bedrock_v827;
 import org.cloudburstmc.protocol.bedrock.codec.v844.Bedrock_v844;
 import org.cloudburstmc.protocol.bedrock.data.EncodingSettings;
 
-import java.util.Collections;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public final class ProtocolInfo {
+    private static final TreeMap<Integer, Pair<ProtocolToProtocol, ProtocolToProtocol>> PROTOCOL_TRANSLATORS = new TreeMap<>();
     private static final Set<BedrockCodec> PACKET_CODECS = ConcurrentHashMap.newKeySet();
     private static final Set<BedrockCodec> UNMODIFIABLE_PACKET_CODECS = Collections.unmodifiableSet(PACKET_CODECS);
 
@@ -93,7 +96,7 @@ public final class ProtocolInfo {
         addPacketCodec(Bedrock_v568.CODEC, 81);
         addPacketCodec(Bedrock_v567.CODEC, 81);
 
-        addPacketCodec(Bedrock_v560.CODEC, 81);
+        addPacketCodec(Bedrock_v560.CODEC, 81, new Protocol560to577(), null);
 
         addPacketCodec(Bedrock_v557.CODEC, 81);
         addPacketCodec(Bedrock_v554.CODEC, 81);
@@ -134,11 +137,41 @@ public final class ProtocolInfo {
         addPacketCodec(Bedrock_v361.CODEC, 11);
 
         // 1.11.0 not playable
-        //addPacketCodec(Bedrock_v354.CODEC, 1);
-        /*addPacketCodec(Bedrock_v340.CODEC, 21);
-        addPacketCodec(Bedrock_v332.CODEC, 21);
-        addPacketCodec(Bedrock_v313.CODEC, 21);
-        addPacketCodec(Bedrock_v291.CODEC, 21);*/
+        // addPacketCodec(Bedrock_v354.CODEC, 1);
+        // addPacketCodec(Bedrock_v340.CODEC, 21);
+        // addPacketCodec(Bedrock_v332.CODEC, 21);
+        // addPacketCodec(Bedrock_v313.CODEC, 21);
+        // addPacketCodec(Bedrock_v291.CODEC, 21);
+    }
+
+//    public static void main(String[] args) {
+//        getTranslators(Bedrock_v361.CODEC.getProtocolVersion(), Bedrock_v582.CODEC.getProtocolVersion());
+//    }
+
+    public static List<ProtocolToProtocol> getTranslators(int target, int client) {
+        if (target == client) {
+            return List.of();
+        }
+
+        boolean isDescending = target > client;
+
+        final List<ProtocolToProtocol> translators = new ArrayList<>();
+        for (Map.Entry<Integer, Pair<ProtocolToProtocol, ProtocolToProtocol>> protocol : (isDescending ? PROTOCOL_TRANSLATORS.descendingMap() : PROTOCOL_TRANSLATORS).entrySet()) {
+            final int protocolVersion = protocol.getKey();
+            if (isDescending ? protocolVersion < client : protocolVersion > client) {
+                break;
+            }
+            if (isDescending == (protocolVersion >= target)) {
+                continue;
+            }
+
+            final ProtocolToProtocol protocolToProtocol = isDescending ? protocol.getValue().forward() : protocol.getValue().backward();
+            if (protocolToProtocol != null) {
+                translators.add(protocolToProtocol);
+            }
+        }
+
+        return translators;
     }
 
     public static BedrockCodec getPacketCodec(int protocolVersion) {
@@ -151,10 +184,20 @@ public final class ProtocolInfo {
     }
 
     public static void addPacketCodec(BedrockCodec packetCodec, int schemaId) {
+        addPacketCodec(packetCodec, schemaId, null, null);
+    }
+
+    public static void addPacketCodec(BedrockCodec packetCodec, int schemaId, ProtocolToProtocol forward, ProtocolToProtocol backward) {
+        // Fixed the codec helper!
         BedrockCodecHelper helper = packetCodec.createHelper();
         helper.setEncodingSettings(EncodingSettings.builder().maxListSize(Integer.MAX_VALUE).maxByteArraySize(Integer.MAX_VALUE).maxNetworkNBTSize(Integer.MAX_VALUE).maxItemNBTSize(Integer.MAX_VALUE).maxStringLength(Integer.MAX_VALUE).build());
         PACKET_CODECS.add(packetCodec.toBuilder().helper(() -> helper).build());
+
         GlobalItemDataHandlers.SCHEMA_ID.put(packetCodec.getProtocolVersion(), schemaId);
+
+        if (forward != null || backward != null) {
+            PROTOCOL_TRANSLATORS.put(packetCodec.getProtocolVersion(), new Pair<>(forward, backward));
+        }
     }
 
     public static Set<BedrockCodec> getPacketCodecs() {

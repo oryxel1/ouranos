@@ -1,7 +1,7 @@
-package com.github.blackjack200.ouranos.translators.inventory;
+package com.github.blackjack200.ouranos.old_translators.inventory;
 
 import com.github.blackjack200.ouranos.session.OuranosSession;
-import com.github.blackjack200.ouranos.translators.storages.ClientInventoryStorage;
+import com.github.blackjack200.ouranos.old_translators.storages.ClientInventoryStorage;
 import org.cloudburstmc.protocol.bedrock.codec.v407.Bedrock_v407;
 import org.cloudburstmc.protocol.bedrock.data.inventory.*;
 import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.request.ItemStackRequest;

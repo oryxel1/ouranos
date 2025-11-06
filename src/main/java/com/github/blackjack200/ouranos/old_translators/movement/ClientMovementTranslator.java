@@ -1,7 +1,7 @@
-package com.github.blackjack200.ouranos.translators.movement;
+package com.github.blackjack200.ouranos.old_translators.movement;
 
 import com.github.blackjack200.ouranos.session.OuranosSession;
-import com.github.blackjack200.ouranos.translators.storages.ClientMovementStorage;
+import com.github.blackjack200.ouranos.old_translators.storages.ClientMovementStorage;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.cloudburstmc.protocol.bedrock.data.SoundEvent;
 import org.cloudburstmc.protocol.bedrock.packet.BedrockPacket;
