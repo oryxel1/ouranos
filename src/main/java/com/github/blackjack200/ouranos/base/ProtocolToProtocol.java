@@ -39,23 +39,21 @@ public class ProtocolToProtocol {
         this.mappedServerBounds.put(klass, consumer);
     }
 
-    public boolean passthroughClientbound(final WrappedBedrockPacket wrapped) {
+    public void passthroughClientbound(final WrappedBedrockPacket wrapped) {
         final Consumer<WrappedBedrockPacket> translator = this.mappedClientBounds.get(wrapped.getPacket().getClass());
         if (translator == null) {
-            return false;
+            return;
         }
 
         translator.accept(wrapped);
-        return true;
     }
 
-    public boolean passthroughServerbound(final WrappedBedrockPacket wrapped) {
+    public void passthroughServerbound(final WrappedBedrockPacket wrapped) {
         final Consumer<WrappedBedrockPacket> translator = this.mappedServerBounds.get(wrapped.getPacket().getClass());
         if (translator == null) {
-            return false;
+            return;
         }
 
         translator.accept(wrapped);
-        return true;
     }
 }
