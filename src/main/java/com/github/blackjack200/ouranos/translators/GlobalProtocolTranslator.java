@@ -48,7 +48,7 @@ public class GlobalProtocolTranslator extends ProtocolToProtocol {
             final BiomeDefinitionListPacket packet = (BiomeDefinitionListPacket) wrapped.getPacket();
 
             // Technical debt moment :P
-            if (wrapped.getOutput() >= Bedrock_v800.CODEC.getProtocolVersion()) {
+            if (wrapped.getOutput() >= Bedrock_v800.CODEC.getProtocolVersion() && packet.getDefinitions() != null) {
                 BiomeDefinitions defs = new BiomeDefinitions(new HashMap<>());
                 packet.getDefinitions().forEach((id, n) -> {
                     var def = BiomeDefinitionRegistry.getInstance(wrapped.getInput()).fromStringId(id);
