@@ -48,6 +48,8 @@ public abstract class OuranosSession {
         this.defaultTranslators.add(new GlobalItemTranslator());
 
         this.translators.addAll(ProtocolInfo.getTranslators(targetVersion, protocolId));
+
+        this.defaultTranslators.forEach(translator -> translator.init(this));
         this.translators.forEach(translator -> translator.init(this));
 
         this.translatorsReversed = new ArrayList<>();
