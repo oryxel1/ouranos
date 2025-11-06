@@ -53,10 +53,6 @@ public class ProtocolRewriterTranslator implements BaseTranslator {
                     });
                     packet.setBiomes(defs);
                 }
-            } else {
-                if (packet.getBiomes() != null && packet.getDefinitions() == null) {
-                    packet.setDefinitions(downgradeBiomeDefinition(output, packet.getBiomes().getDefinitions()));
-                }
             }
         } else if (bedrockPacket instanceof PlayerListPacket packet) {
             for (final PlayerListPacket.Entry entry : packet.getEntries()) {
@@ -115,9 +111,7 @@ public class ProtocolRewriterTranslator implements BaseTranslator {
     }
 
     private BedrockPacket translateBothWay(OuranosSession session, final BedrockPacket bedrockPacket, int input, int output) {
-        if (bedrockPacket instanceof PlayerSkinPacket packet && ProtocolInfo.getPacketCodec(output) != null) {
-            packet.setSkin(packet.getSkin().toBuilder().geometryDataEngineVersion(ProtocolInfo.getPacketCodec(output).getMinecraftVersion()).build());
-        } else if (input < Bedrock_v685.CODEC.getProtocolVersion() && bedrockPacket instanceof ContainerClosePacket packet) {
+        if (input < Bedrock_v685.CODEC.getProtocolVersion() && bedrockPacket instanceof ContainerClosePacket packet) {
             packet.setType(ContainerType.NONE);
         } else if (input < Bedrock_v671.CODEC.getProtocolVersion() && bedrockPacket instanceof ResourcePackStackPacket packet) {
             packet.setHasEditorPacks(false);
@@ -129,23 +123,5 @@ public class ProtocolRewriterTranslator implements BaseTranslator {
 
         return bedrockPacket;
     }
-
-    private static NbtMap downgradeBiomeDefinition(int output, Map<String, BiomeDefinitionData> definitions) {
-        var builder = NbtMap.builder();
-        if (definitions.isEmpty()) {
-            definitions = BiomeDefinitionRegistry.getInstance(output).getEntries();
-        }
-        definitions.forEach((id, def) -> {
-            var d = NbtMap.builder();
-            d.putString("name_hash", id);
-            d.putFloat("temperature", def.getTemperature());
-            d.putFloat("downfall", def.getDownfall());
-            d.putBoolean("rain", def.isRain());
-            builder.putCompound(id, d.build());
-        });
-        NbtMap build = builder.build();
-        return build;
-    }
-
 
 }

@@ -43,46 +43,6 @@ public class AdventureSettingsTranslator implements BaseTranslator {
     public BedrockPacket translateClientbound(OuranosSession session, BedrockPacket bedrockPacket) {
         final int output = session.getProtocolId();
         if (output > Bedrock_v554.CODEC.getProtocolVersion() && bedrockPacket instanceof AdventureSettingsPacket packet) {
-            var newPk = new UpdateAbilitiesPacket();
-            newPk.setUniqueEntityId(packet.getUniqueEntityId());
-            newPk.setPlayerPermission(packet.getPlayerPermission());
-            newPk.setCommandPermission(packet.getCommandPermission());
-            var layer = new AbilityLayer();
-            layer.setLayerType(AbilityLayer.Type.BASE);
-            layer.setFlySpeed(0.05f);
-            layer.setWalkSpeed(0.1f);
-
-            var settings = packet.getSettings();
-            Collections.addAll(layer.getAbilitiesSet(), Ability.values());
-            newPk.setAbilityLayers(List.of(layer));
-            BiFunction<AdventureSetting, Ability, Void> f = (AdventureSetting b, Ability b1) -> {
-                if (settings.contains(b)) {
-                    layer.getAbilityValues().add(b1);
-                }
-                return null;
-            };
-            f.apply(AdventureSetting.BUILD, Ability.BUILD);
-            f.apply(AdventureSetting.MINE, Ability.MINE);
-            f.apply(AdventureSetting.DOORS_AND_SWITCHES, Ability.DOORS_AND_SWITCHES);
-            f.apply(AdventureSetting.OPEN_CONTAINERS, Ability.OPEN_CONTAINERS);
-            f.apply(AdventureSetting.ATTACK_PLAYERS, Ability.ATTACK_PLAYERS);
-            f.apply(AdventureSetting.ATTACK_MOBS, Ability.ATTACK_MOBS);
-            f.apply(AdventureSetting.OPERATOR, Ability.OPERATOR_COMMANDS);
-            f.apply(AdventureSetting.TELEPORT, Ability.TELEPORT);
-            f.apply(AdventureSetting.FLYING, Ability.FLYING);
-            f.apply(AdventureSetting.MAY_FLY, Ability.MAY_FLY);
-            f.apply(AdventureSetting.MUTED, Ability.MUTED);
-            f.apply(AdventureSetting.WORLD_BUILDER, Ability.WORLD_BUILDER);
-            f.apply(AdventureSetting.NO_CLIP, Ability.NO_CLIP);
-            session.sendUpstreamPacket(newPk);
-
-            var newPk2 = new UpdateAdventureSettingsPacket();
-            newPk2.setAutoJump(settings.contains(AdventureSetting.AUTO_JUMP));
-            newPk2.setImmutableWorld(settings.contains(AdventureSetting.WORLD_IMMUTABLE));
-            newPk2.setNoMvP(settings.contains(AdventureSetting.NO_MVP));
-            newPk2.setNoPvM(settings.contains(AdventureSetting.NO_PVM));
-            newPk2.setShowNameTags(settings.contains(AdventureSetting.SHOW_NAME_TAGS));
-            session.sendUpstreamPacket(newPk2);
             return null;
         }
 
