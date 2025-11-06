@@ -1,4 +1,4 @@
 package com.github.blackjack200.ouranos.utils;
 
-public record Pair<A, B>(A forward, B backward) {
+public record Pair<A, B>(A a, B b) {
 }

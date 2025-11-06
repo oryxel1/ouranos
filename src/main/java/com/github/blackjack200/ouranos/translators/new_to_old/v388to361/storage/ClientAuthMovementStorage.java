@@ -4,6 +4,7 @@ import com.github.blackjack200.ouranos.session.OuranosSession;
 import com.github.blackjack200.ouranos.session.storage.OuranosStorage;
 import lombok.Getter;
 import lombok.Setter;
+import org.cloudburstmc.math.vector.Vector2f;
 import org.cloudburstmc.math.vector.Vector3f;
 import org.cloudburstmc.protocol.bedrock.data.*;
 import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.request.ItemStackRequest;
@@ -36,6 +37,9 @@ public class ClientAuthMovementStorage extends OuranosStorage {
         packet.setPosition(this.position);
         packet.setRotation(this.rotation);
         packet.getInputData().addAll(this.inputData);
+        packet.setMotion(Vector2f.ZERO);
+        packet.setDelta(Vector3f.ZERO);
+        packet.setPlayMode(ClientPlayMode.NORMAL);
         this.inputData.clear();
 
 //        final ItemUseTransaction itemTransaction = this.itemTransactions.poll();

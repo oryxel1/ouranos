@@ -9,8 +9,6 @@ import org.cloudburstmc.protocol.bedrock.packet.PlayerActionPacket;
 import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket;
 import org.cloudburstmc.protocol.bedrock.packet.RequestAbilityPacket;
 
-import java.util.Optional;
-
 public class Protocol527to503 extends ProtocolToProtocol {
     @Override
     protected void registerProtocol() {
@@ -26,7 +24,7 @@ public class Protocol527to503 extends ProtocolToProtocol {
 
         this.registerServerbound(PlayerAuthInputPacket.class, wrapped -> {
             final PlayerAuthInputPacket packet = (PlayerAuthInputPacket) wrapped.getPacket();
-            packet.setInputInteractionModel(Optional.ofNullable(packet.getInputInteractionModel()).orElse(InputInteractionModel.CLASSIC));
+            packet.setInputInteractionModel(InputInteractionModel.CLASSIC);
         });
 
         this.registerServerbound(PlayerActionPacket.class, wrapped -> {
