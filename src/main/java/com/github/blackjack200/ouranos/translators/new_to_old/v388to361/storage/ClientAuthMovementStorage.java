@@ -23,9 +23,9 @@ public class ClientAuthMovementStorage extends OuranosStorage {
     private Vector3f position, rotation;
 
     private final Queue<PlayerAuthInputData> inputData = new ArrayDeque<>(16);
-    private final Queue<ItemUseTransaction> itemTransactions = new ArrayDeque<>(16);
-    private final Queue<ItemStackRequest> stackRequests = new ArrayDeque<>(16);
-    private final Queue<PlayerBlockActionData> blockInteractions = new ArrayDeque<>(16);
+//    private final Queue<ItemUseTransaction> itemTransactions = new ArrayDeque<>(16);
+//    private final Queue<ItemStackRequest> stackRequests = new ArrayDeque<>(16);
+//    private final Queue<PlayerBlockActionData> blockInteractions = new ArrayDeque<>(16);
     private InputMode inputMode = InputMode.UNDEFINED;
 
     private boolean breaking;
@@ -38,21 +38,21 @@ public class ClientAuthMovementStorage extends OuranosStorage {
         packet.getInputData().addAll(this.inputData);
         this.inputData.clear();
 
-        final ItemUseTransaction itemTransaction = this.itemTransactions.poll();
-        if (itemTransaction != null) {
-            packet.getInputData().add(PlayerAuthInputData.PERFORM_ITEM_INTERACTION);
-            packet.setItemUseTransaction(itemTransaction);
-        }
-        final ItemStackRequest stackRequest = this.stackRequests.poll();
-        if (stackRequest != null) {
-            packet.getInputData().add(PlayerAuthInputData.PERFORM_ITEM_STACK_REQUEST);
-            packet.setItemStackRequest(stackRequest);
-        }
-        if (!this.blockInteractions.isEmpty()) {
-            packet.getInputData().add(PlayerAuthInputData.PERFORM_BLOCK_ACTIONS);
-            packet.getPlayerActions().addAll(this.blockInteractions);
-            this.blockInteractions.clear();
-        }
+//        final ItemUseTransaction itemTransaction = this.itemTransactions.poll();
+//        if (itemTransaction != null) {
+//            packet.getInputData().add(PlayerAuthInputData.PERFORM_ITEM_INTERACTION);
+//            packet.setItemUseTransaction(itemTransaction);
+//        }
+//        final ItemStackRequest stackRequest = this.stackRequests.poll();
+//        if (stackRequest != null) {
+//            packet.getInputData().add(PlayerAuthInputData.PERFORM_ITEM_STACK_REQUEST);
+//            packet.setItemStackRequest(stackRequest);
+//        }
+//        if (!this.blockInteractions.isEmpty()) {
+//            packet.getInputData().add(PlayerAuthInputData.PERFORM_BLOCK_ACTIONS);
+//            packet.getPlayerActions().addAll(this.blockInteractions);
+//            this.blockInteractions.clear();
+//        }
         return packet;
     }
 }
