@@ -2,6 +2,7 @@ package com.github.blackjack200.ouranos;
 
 import com.github.blackjack200.ouranos.base.ProtocolToProtocol;
 import com.github.blackjack200.ouranos.data.bedrock.GlobalItemDataHandlers;
+import com.github.blackjack200.ouranos.translators.new_to_old.v388to361.Protocol388to361;
 import com.github.blackjack200.ouranos.translators.new_to_old.v560to577.Protocol560to577;
 import com.github.blackjack200.ouranos.translators.old_to_new.v766to776.Protocol766to776;
 import com.github.blackjack200.ouranos.utils.Pair;
@@ -123,6 +124,7 @@ public final class ProtocolInfo {
         addPacketCodec(Bedrock_v428.CODEC, 31);
         addPacketCodec(Bedrock_v422.CODEC, 31);
         addPacketCodec(Bedrock_v419.CODEC, 21);
+
         //1.16.40 partially playable
         addPacketCodec(Bedrock_v408.CODEC, 11);
         addPacketCodec(Bedrock_v407.CODEC, 11);
@@ -132,7 +134,7 @@ public final class ProtocolInfo {
         addPacketCodec(Bedrock_v389.CODEC, 11);
 
         // 1.13.0 partially playable
-        addPacketCodec(Bedrock_v388.CODEC, 11);
+        addPacketCodec(Bedrock_v388.CODEC, 11, new Protocol388to361(), null);
 
         // 1.12.0 partially playable
         addPacketCodec(Bedrock_v361.CODEC, 11);

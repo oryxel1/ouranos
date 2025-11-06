@@ -1,4 +1,4 @@
-package com.github.blackjack200.ouranos.old_translators.storages;
+package com.github.blackjack200.ouranos.translators.new_to_old.v388to361.storage;
 
 import com.github.blackjack200.ouranos.session.OuranosSession;
 import com.github.blackjack200.ouranos.session.storage.OuranosStorage;
@@ -15,11 +15,10 @@ import java.util.Queue;
 
 @Getter
 @Setter
-public class ClientMovementStorage extends OuranosStorage {
-    public ClientMovementStorage(OuranosSession user) {
+public class ClientAuthMovementStorage extends OuranosStorage {
+    public ClientAuthMovementStorage(OuranosSession user) {
         super(user);
     }
-
 
     private Vector3f position, rotation;
 
@@ -27,7 +26,9 @@ public class ClientMovementStorage extends OuranosStorage {
     private final Queue<ItemUseTransaction> itemTransactions = new ArrayDeque<>(16);
     private final Queue<ItemStackRequest> stackRequests = new ArrayDeque<>(16);
     private final Queue<PlayerBlockActionData> blockInteractions = new ArrayDeque<>(16);
-    private final InputMode inputMode = InputMode.UNDEFINED;
+    private InputMode inputMode = InputMode.UNDEFINED;
+
+    private boolean breaking;
 
     public PlayerAuthInputPacket toAuthInput() {
         final PlayerAuthInputPacket packet = new PlayerAuthInputPacket();
