@@ -14,16 +14,10 @@ import org.cloudburstmc.protocol.bedrock.codec.v671.Bedrock_v671;
 import org.cloudburstmc.protocol.bedrock.codec.v685.Bedrock_v685;
 import org.cloudburstmc.protocol.bedrock.codec.v712.Bedrock_v712;
 import org.cloudburstmc.protocol.bedrock.codec.v729.Bedrock_v729;
-import org.cloudburstmc.protocol.bedrock.codec.v776.Bedrock_v776;
 import org.cloudburstmc.protocol.bedrock.codec.v800.Bedrock_v800;
 import org.cloudburstmc.protocol.bedrock.data.InputInteractionModel;
-import org.cloudburstmc.protocol.bedrock.data.biome.BiomeDefinitionData;
 import org.cloudburstmc.protocol.bedrock.data.biome.BiomeDefinitions;
-import org.cloudburstmc.protocol.bedrock.data.definitions.ItemDefinition;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ContainerType;
-import org.cloudburstmc.protocol.bedrock.data.inventory.FullContainerName;
-import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.request.ItemStackRequest;
-import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.request.ItemStackRequestSlotData;
 import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.request.action.*;
 import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.response.ItemStackResponse;
 import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.response.ItemStackResponseStatus;
@@ -40,21 +34,7 @@ public class ProtocolRewriterTranslator implements BaseTranslator {
     public BedrockPacket translateClientbound(OuranosSession session, BedrockPacket bedrockPacket) {
         final int input = session.getTargetVersion(), output = session.getProtocolId();
 
-        if (bedrockPacket instanceof BiomeDefinitionListPacket packet) {
-            // TODO fix biome for v800
-            if (output >= Bedrock_v800.CODEC.getProtocolVersion()) {
-                if (packet.getBiomes() == null && packet.getDefinitions() != null) {
-                    BiomeDefinitions defs = new BiomeDefinitions(new HashMap<>());
-                    packet.getDefinitions().forEach((id, n) -> {
-                        var def = BiomeDefinitionRegistry.getInstance(input).fromStringId(id);
-                        if (def != null) {
-                            defs.getDefinitions().put(id, def);
-                        }
-                    });
-                    packet.setBiomes(defs);
-                }
-            }
-        } else if (bedrockPacket instanceof PlayerListPacket packet) {
+        if (bedrockPacket instanceof PlayerListPacket packet) {
             for (final PlayerListPacket.Entry entry : packet.getEntries()) {
                 entry.setColor(Objects.requireNonNullElse(entry.getColor(), Color.WHITE));
                 if (entry.getSkin() != null) {
@@ -64,9 +44,6 @@ public class ProtocolRewriterTranslator implements BaseTranslator {
                     entry.setSubClient(false);
                 }
             }
-        } else if (bedrockPacket instanceof LevelChunkPacket packet && input < Bedrock_v649.CODEC.getProtocolVersion()) {
-            // FIXME overworld?
-            packet.setDimension(0);
         } if (input < Bedrock_v544.CODEC.getProtocolVersion() && bedrockPacket instanceof ModalFormResponsePacket packet) {
             if (session.prevFormId == packet.getFormId()) {
                 return null;
@@ -94,17 +71,8 @@ public class ProtocolRewriterTranslator implements BaseTranslator {
     public BedrockPacket translateServerbound(OuranosSession session, BedrockPacket bedrockPacket) {
         final int input = session.getProtocolId(), output = session.getTargetVersion();
 
-        if (input < Bedrock_v527.CODEC.getProtocolVersion()) {
-            if (bedrockPacket instanceof PlayerAuthInputPacket packet) {
-                packet.setInputInteractionModel(Optional.ofNullable(packet.getInputInteractionModel()).orElse(InputInteractionModel.CLASSIC));
-            } else if (bedrockPacket instanceof PlayerActionPacket packet) {
-                packet.setResultPosition(packet.getBlockPosition());
-            }
-        }
-
         if (input < Bedrock_v712.CODEC.getProtocolVersion() && bedrockPacket instanceof InventoryTransactionPacket packet) {
-            packet.setTriggerType(ItemUseTransaction.TriggerType.PLAYER_INPUT);
-            packet.setClientInteractPrediction(ItemUseTransaction.PredictedResult.SUCCESS);
+
         }
 
         return translateBothWay(session, bedrockPacket, input, output);

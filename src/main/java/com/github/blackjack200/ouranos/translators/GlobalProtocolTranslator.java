@@ -9,6 +9,7 @@ import com.github.blackjack200.ouranos.translators.global_storage.EntityMetadata
 import org.cloudburstmc.nbt.NbtMap;
 import org.cloudburstmc.protocol.bedrock.codec.v800.Bedrock_v800;
 import org.cloudburstmc.protocol.bedrock.data.biome.BiomeDefinitionData;
+import org.cloudburstmc.protocol.bedrock.data.biome.BiomeDefinitions;
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityDataMap;
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityDataType;
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
@@ -44,12 +45,21 @@ public class GlobalProtocolTranslator extends ProtocolToProtocol {
 
         // Downgrade biomes!
         this.registerClientbound(BiomeDefinitionListPacket.class, wrapped -> {
+            final BiomeDefinitionListPacket packet = (BiomeDefinitionListPacket) wrapped.getPacket();
+
             // Technical debt moment :P
             if (wrapped.getOutput() >= Bedrock_v800.CODEC.getProtocolVersion()) {
+                BiomeDefinitions defs = new BiomeDefinitions(new HashMap<>());
+                packet.getDefinitions().forEach((id, n) -> {
+                    var def = BiomeDefinitionRegistry.getInstance(wrapped.getInput()).fromStringId(id);
+                    if (def != null) {
+                        defs.getDefinitions().put(id, def);
+                    }
+                });
+                packet.setBiomes(defs);
                 return;
             }
 
-            final BiomeDefinitionListPacket packet = (BiomeDefinitionListPacket) wrapped.getPacket();
             if (packet.getBiomes() != null && packet.getDefinitions() == null) {
                 packet.setDefinitions(downgradeBiomeDefinition(wrapped.getOutput(), packet.getBiomes().getDefinitions()));
             }
