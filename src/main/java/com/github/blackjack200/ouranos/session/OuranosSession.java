@@ -19,7 +19,6 @@ public abstract class OuranosSession {
     private long uniqueId, runtimeId;
     @Getter
     private final int protocolId, targetVersion;
-    public int prevFormId;
 
     @Getter
     private boolean serverAuthoritativeInventories;

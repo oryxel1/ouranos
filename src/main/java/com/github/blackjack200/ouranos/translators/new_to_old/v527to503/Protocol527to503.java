@@ -14,14 +14,13 @@ import java.util.Optional;
 public class Protocol527to503 extends ProtocolToProtocol {
     @Override
     protected void registerProtocol() {
-        this.registerServerbound(RequestAbilityPacket.class, wrapped -> {
-            final RequestAbilityPacket packet = (RequestAbilityPacket) wrapped.getPacket();
+        this.registerServerbound(AdventureSettingsPacket.class, wrapped -> {
+            final AdventureSettingsPacket packet = (AdventureSettingsPacket) wrapped.getPacket();
 
-            final AdventureSettingsPacket newPacket = new AdventureSettingsPacket();
-            newPacket.setUniqueEntityId(wrapped.session().getUniqueId());
-            if (packet.getAbility() == Ability.FLYING) {
-                newPacket.getSettings().add(AdventureSetting.FLYING);
-            }
+            final RequestAbilityPacket newPacket = new RequestAbilityPacket();
+            newPacket.setAbility(Ability.FLYING);
+            newPacket.setType(Ability.Type.BOOLEAN);
+            newPacket.setBoolValue(packet.getSettings().contains(AdventureSetting.FLYING));
             wrapped.setPacket(newPacket);
         });
 

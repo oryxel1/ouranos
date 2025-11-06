@@ -4,11 +4,26 @@ import com.github.blackjack200.ouranos.base.ProtocolToProtocol;
 import com.github.blackjack200.ouranos.data.bedrock.GlobalItemDataHandlers;
 import com.github.blackjack200.ouranos.translators.new_to_old.v388to361.Protocol388to361;
 import com.github.blackjack200.ouranos.translators.new_to_old.v407to390.Protocol407to390;
+import com.github.blackjack200.ouranos.translators.new_to_old.v419to408.Protocol419to408;
 import com.github.blackjack200.ouranos.translators.new_to_old.v527to503.Protocol527to503;
+import com.github.blackjack200.ouranos.translators.new_to_old.v534to527.Protocol534to527;
+import com.github.blackjack200.ouranos.translators.new_to_old.v544to534.Protocol544to534;
 import com.github.blackjack200.ouranos.translators.new_to_old.v560to577.Protocol560to577;
+import com.github.blackjack200.ouranos.translators.new_to_old.v589to582.Protocol589to582;
+import com.github.blackjack200.ouranos.translators.new_to_old.v618to594.Protocol618to594;
+import com.github.blackjack200.ouranos.translators.new_to_old.v685to671.Protocol685to671;
 import com.github.blackjack200.ouranos.translators.new_to_old.v712to686.Protocol712to686;
+import com.github.blackjack200.ouranos.translators.new_to_old.v729to712.Protocol729to712;
+import com.github.blackjack200.ouranos.translators.new_to_old.v818to800.Protocol818to800;
+import com.github.blackjack200.ouranos.translators.new_to_old.v844to827.Protocol844to827;
+import com.github.blackjack200.ouranos.translators.old_to_new.v408to419.Protocol408to419;
+import com.github.blackjack200.ouranos.translators.old_to_new.v503to527.Protocol503to527;
 import com.github.blackjack200.ouranos.translators.old_to_new.v545to554.Protocol545to554;
+import com.github.blackjack200.ouranos.translators.old_to_new.v582to589.Protocol582to589;
+import com.github.blackjack200.ouranos.translators.old_to_new.v671to685.Protocol671to685;
+import com.github.blackjack200.ouranos.translators.old_to_new.v712to729.Protocol712to729;
 import com.github.blackjack200.ouranos.translators.old_to_new.v766to776.Protocol766to776;
+import com.github.blackjack200.ouranos.utils.CodecUtil;
 import com.github.blackjack200.ouranos.utils.Pair;
 import org.cloudburstmc.protocol.bedrock.codec.BedrockCodec;
 import org.cloudburstmc.protocol.bedrock.codec.BedrockCodecHelper;
@@ -40,6 +55,7 @@ import org.cloudburstmc.protocol.bedrock.codec.v567.Bedrock_v567;
 import org.cloudburstmc.protocol.bedrock.codec.v568.Bedrock_v568;
 import org.cloudburstmc.protocol.bedrock.codec.v575.Bedrock_v575;
 import org.cloudburstmc.protocol.bedrock.codec.v582.Bedrock_v582;
+import org.cloudburstmc.protocol.bedrock.codec.v589.Bedrock_v589;
 import org.cloudburstmc.protocol.bedrock.codec.v594.Bedrock_v594;
 import org.cloudburstmc.protocol.bedrock.codec.v618.Bedrock_v618;
 import org.cloudburstmc.protocol.bedrock.codec.v622.Bedrock_v622;
@@ -70,34 +86,37 @@ public final class ProtocolInfo {
     private static final Set<BedrockCodec> PACKET_CODECS = ConcurrentHashMap.newKeySet();
     private static final Set<BedrockCodec> UNMODIFIABLE_PACKET_CODECS = Collections.unmodifiableSet(PACKET_CODECS);
 
+    public static void init() {
+    }
+
     static {
         // 1.21.x
-        addPacketCodec(Bedrock_v844.CODEC, 241);
+        addPacketCodec(Bedrock_v844.CODEC, 241, new Protocol844to827(), null);
         addPacketCodec(Bedrock_v827.CODEC, 241);
         addPacketCodec(Bedrock_v819.CODEC, 231);
-        addPacketCodec(Bedrock_v818.CODEC, 231);
+        addPacketCodec(Bedrock_v818.CODEC, 231, new Protocol818to800(), null);
         addPacketCodec(Bedrock_v800.CODEC, 231);
         addPacketCodec(Bedrock_v786.CODEC, 231);
         addPacketCodec(Bedrock_v776.CODEC, 231);
         addPacketCodec(Bedrock_v766.CODEC, 231, null, new Protocol766to776());
         addPacketCodec(Bedrock_v748.CODEC, 221);
-        addPacketCodec(Bedrock_v729.CODEC, 211);
-        addPacketCodec(Bedrock_v712.CODEC, 201, new Protocol712to686(), null);
-        addPacketCodec(Bedrock_v686.CODEC, 201);
+        addPacketCodec(Bedrock_v729.CODEC, 211, new Protocol729to712(), null);
+        addPacketCodec(Bedrock_v712.CODEC, 201, new Protocol712to686(), new Protocol712to729());
+        addPacketCodec(Bedrock_v686.CODEC, 201, new Protocol685to671(), null);
         addPacketCodec(Bedrock_v685.CODEC, 191);
+
         // 1.20.x
-        addPacketCodec(Bedrock_v671.CODEC, 181);
+        addPacketCodec(Bedrock_v671.CODEC, 181, null, new Protocol671to685());
         addPacketCodec(Bedrock_v662.CODEC, 171);
         addPacketCodec(Bedrock_v649.CODEC, 161);
         addPacketCodec(Bedrock_v630.CODEC, 151);
         addPacketCodec(Bedrock_v622.CODEC, 141);
-        addPacketCodec(Bedrock_v618.CODEC, 131);
+        addPacketCodec(Bedrock_v618.CODEC, 131, new Protocol618to594(), null);
         addPacketCodec(Bedrock_v594.CODEC, 121);
-        //TODO add v589 support back
-        //addPacketCodec(Bedrock_v589.CODEC);
+        addPacketCodec(Bedrock_v589.CODEC, 121, new Protocol589to582(), null);
 
         // 1.19.x
-        addPacketCodec(Bedrock_v582.CODEC, 101);
+        addPacketCodec(Bedrock_v582.CODEC, 101, null, new Protocol582to589());
         addPacketCodec(Bedrock_v575.CODEC, 91);
         addPacketCodec(Bedrock_v568.CODEC, 81);
         addPacketCodec(Bedrock_v567.CODEC, 81);
@@ -108,12 +127,12 @@ public final class ProtocolInfo {
         addPacketCodec(Bedrock_v554.CODEC, 81);
 
         addPacketCodec(Bedrock_v545.CODEC, 71, null, new Protocol545to554());
-        addPacketCodec(Bedrock_v544.CODEC, 71);
-        addPacketCodec(Bedrock_v534.CODEC, 71);
+        addPacketCodec(Bedrock_v544.CODEC, 71, new Protocol544to534(), null);
+        addPacketCodec(Bedrock_v534.CODEC, 71, new Protocol534to527(), null);
         addPacketCodec(Bedrock_v527.CODEC, 71, new Protocol527to503(), null);
 
         // 1.18.x
-        addPacketCodec(Bedrock_v503.CODEC, 71);
+        addPacketCodec(Bedrock_v503.CODEC, 71, null, new Protocol503to527());
         addPacketCodec(Bedrock_v486.CODEC, 61);
         addPacketCodec(Bedrock_v475.CODEC, 51);
 
@@ -127,10 +146,10 @@ public final class ProtocolInfo {
         addPacketCodec(Bedrock_v431.CODEC, 31);
         addPacketCodec(Bedrock_v428.CODEC, 31);
         addPacketCodec(Bedrock_v422.CODEC, 31);
-        addPacketCodec(Bedrock_v419.CODEC, 21);
+        addPacketCodec(Bedrock_v419.CODEC, 21, new Protocol419to408(), null);
 
         //1.16.40 partially playable
-        addPacketCodec(Bedrock_v408.CODEC, 11);
+        addPacketCodec(Bedrock_v408.CODEC, 11, null, new Protocol408to419());
         addPacketCodec(Bedrock_v407.CODEC, 11, new Protocol407to390(), null);
 
         // 1.14.x partially playable
@@ -195,10 +214,7 @@ public final class ProtocolInfo {
     }
 
     public static void addPacketCodec(BedrockCodec packetCodec, int schemaId, ProtocolToProtocol forward, ProtocolToProtocol backward) {
-        // Fixed the codec helper!
-        BedrockCodecHelper helper = packetCodec.createHelper();
-        helper.setEncodingSettings(EncodingSettings.builder().maxListSize(Integer.MAX_VALUE).maxByteArraySize(Integer.MAX_VALUE).maxNetworkNBTSize(Integer.MAX_VALUE).maxItemNBTSize(Integer.MAX_VALUE).maxStringLength(Integer.MAX_VALUE).build());
-        PACKET_CODECS.add(packetCodec.toBuilder().helper(() -> helper).build());
+        PACKET_CODECS.add(CodecUtil.rebuildCodec(packetCodec));
 
         GlobalItemDataHandlers.SCHEMA_ID.put(packetCodec.getProtocolVersion(), schemaId);
 
