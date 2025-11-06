@@ -20,6 +20,7 @@ public class Protocol818to800 extends ProtocolToProtocol {
 
         this.registerClientbound(ResourcePackStackPacket.class, wrapped -> {
             final ResourcePackStackPacket packet = (ResourcePackStackPacket) wrapped.getPacket();
+
             packet.getExperiments().add(new ExperimentData("y_2025_drop_2", true));
             packet.getExperiments().add(new ExperimentData("locator_bar", true));
         });

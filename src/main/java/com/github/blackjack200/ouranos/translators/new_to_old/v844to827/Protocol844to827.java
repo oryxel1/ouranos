@@ -10,15 +10,11 @@ public class Protocol844to827 extends ProtocolToProtocol {
     protected void registerProtocol() {
         this.registerClientbound(ResourcePackStackPacket.class, wrapped -> {
             final ResourcePackStackPacket packet = (ResourcePackStackPacket) wrapped.getPacket();
-
-            // We want to add support for some of the new blocks.
             packet.getExperiments().add(new ExperimentData("y_2025_drop_3", true));
         });
 
         this.registerClientbound(StartGamePacket.class, wrapped -> {
             final StartGamePacket packet = (StartGamePacket) wrapped.getPacket();
-
-            // We want to add support for some of the new items.
             packet.getExperiments().add(new ExperimentData("y_2025_drop_3", true));
         });
     }

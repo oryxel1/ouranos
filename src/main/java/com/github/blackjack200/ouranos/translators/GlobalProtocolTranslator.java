@@ -36,7 +36,7 @@ public class GlobalProtocolTranslator extends ProtocolToProtocol {
         });
         this.registerClientbound(ResourcePackStackPacket.class, wrapped -> {
             final ResourcePackStackPacket packet = (ResourcePackStackPacket) wrapped.getPacket();
-            packet.setGameVersion("*");
+            packet.setGameVersion(ProtocolInfo.getPacketCodec(wrapped.session().getProtocolId()).getMinecraftVersion());
         });
         this.registerServerbound(ClientCacheStatusPacket.class, wrapped -> {
             final ClientCacheStatusPacket packet = (ClientCacheStatusPacket) wrapped.getPacket();
