@@ -2,9 +2,8 @@ package com.github.blackjack200.ouranos.translators;
 
 import com.github.blackjack200.ouranos.base.ProtocolToProtocol;
 import com.github.blackjack200.ouranos.base.WrappedBedrockPacket;
+import com.github.blackjack200.ouranos.converter.ItemTypeDictionary;
 import com.github.blackjack200.ouranos.converter.TypeConverter;
-import org.cloudburstmc.protocol.bedrock.data.inventory.CreativeItemData;
-import org.cloudburstmc.protocol.bedrock.data.inventory.CreativeItemGroup;
 import org.cloudburstmc.protocol.bedrock.data.inventory.FullContainerName;
 import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.request.ItemStackRequest;
 import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.request.ItemStackRequestSlotData;
@@ -56,6 +55,18 @@ public class GlobalItemTranslator extends ProtocolToProtocol {
         this.registerClientbound(InventoryContentPacket.class, wrapped -> {
             final InventoryContentPacket packet = (InventoryContentPacket) wrapped.getPacket();
             packet.getContents().replaceAll(itemData -> TypeConverter.translateItemData(wrapped.getInput(), wrapped.getOutput(), itemData));
+        });
+
+        this.registerClientbound(ItemComponentPacket.class, wrapped -> {
+            final ItemComponentPacket packet = (ItemComponentPacket) wrapped.getPacket();
+            final ItemTypeDictionary.InnerEntry itemDictionary = ItemTypeDictionary.getInstance(wrapped.getOutput());
+
+            // Clear all vanilla items, both from the old protocol and new one... while allowing non-vanilla items to stay.
+            packet.getItems().removeIf(definition -> ItemTypeDictionary.getInstance(wrapped.getInput()).fromStringId(definition.getIdentifier()) != null);
+            packet.getItems().removeIf(definition -> itemDictionary.fromStringId(definition.getIdentifier()) != null);
+
+            // Now add back all the vanilla items that is actually correct.
+            packet.getItems().addAll(itemDictionary.getEntries().entrySet().stream().map((e) -> e.getValue().toDefinition(e.getKey())).toList());
         });
 
         this.registerClientbound(CraftingDataPacket.class, wrapped -> {
