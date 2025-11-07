@@ -44,7 +44,7 @@ public abstract class SpecialOuranosSession extends OuranosSession {
 
     public final boolean translateServerbound(ByteBuf input, ByteBuf output, int id) {
         BedrockPacket packet = this.clientCodec.tryDecode(this.clientCodecHelper, input, id);
-        packet = this.translateClientbound(packet);
+        packet = this.translateServerbound(packet);
         if (packet == null) {
             return false;
         }
