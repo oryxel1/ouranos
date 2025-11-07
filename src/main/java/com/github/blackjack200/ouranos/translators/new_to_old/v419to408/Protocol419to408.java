@@ -3,12 +3,14 @@ package com.github.blackjack200.ouranos.translators.new_to_old.v419to408;
 import com.github.blackjack200.ouranos.base.ProtocolToProtocol;
 import com.github.blackjack200.ouranos.converter.BlockStateDictionary;
 import com.github.blackjack200.ouranos.data.LegacyBlockIdToStringIdMap;
+import org.cloudburstmc.math.vector.Vector3f;
 import org.cloudburstmc.nbt.NbtList;
 import org.cloudburstmc.nbt.NbtMap;
 import org.cloudburstmc.nbt.NbtType;
 import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.response.ItemStackResponse;
 import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.response.ItemStackResponseStatus;
 import org.cloudburstmc.protocol.bedrock.packet.ItemStackResponsePacket;
+import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket;
 import org.cloudburstmc.protocol.bedrock.packet.StartGamePacket;
 
 import java.util.List;
@@ -31,6 +33,11 @@ public class Protocol419to408 extends ProtocolToProtocol {
                 return NbtMap.builder().putCompound("block", e.rawState()).putShort("id", legacyId).build();
             }).toList();
             packet.setBlockPalette(new NbtList<>(NbtType.COMPOUND, states));
+        });
+
+        this.registerServerbound(PlayerAuthInputPacket.class, wrapped -> {
+            final PlayerAuthInputPacket packet = (PlayerAuthInputPacket) wrapped.getPacket();
+            packet.setDelta(Vector3f.ZERO);
         });
     }
 }

@@ -20,7 +20,6 @@ public class Protocol428to422 extends ProtocolToProtocol {
     protected void registerProtocol() {
         this.registerServerbound(PlayerActionPacket.class, wrapped -> {
             if (wrapped.session().getAuthoritativeMovementMode() == AuthoritativeMovementMode.CLIENT) {
-                System.out.println("Client authoritative!");
                 return;
             }
 

@@ -17,8 +17,19 @@ import org.cloudburstmc.protocol.bedrock.packet.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.cloudburstmc.protocol.bedrock.data.LevelEvent.*;
+import static org.cloudburstmc.protocol.bedrock.data.LevelEvent.PARTICLE_BREAK_BLOCK_EAST;
+import static org.cloudburstmc.protocol.bedrock.data.LevelEvent.PARTICLE_BREAK_BLOCK_SOUTH;
+import static org.cloudburstmc.protocol.bedrock.data.LevelEvent.PARTICLE_BREAK_BLOCK_WEST;
+
 // These will be translated directly instead of passing through multiple translators.
 public class GlobalWorldTranslator extends ProtocolToProtocol {
+    private static final List<LevelEventType> BLOCK_BREAK_PARTICLE_EVENTS = List.of(
+            PARTICLE_BREAK_BLOCK_DOWN, PARTICLE_BREAK_BLOCK_UP, PARTICLE_BREAK_BLOCK_NORTH,
+            PARTICLE_BREAK_BLOCK_SOUTH, PARTICLE_BREAK_BLOCK_WEST, PARTICLE_BREAK_BLOCK_EAST,
+            PARTICLE_DESTROY_BLOCK
+    );
+
     @Override
     protected void registerProtocol() {
         this.registerClientbound(UpdateBlockPacket.class, wrapped -> {
@@ -36,7 +47,7 @@ public class GlobalWorldTranslator extends ProtocolToProtocol {
             if (type == ParticleType.ICON_CRACK) {
                 var newItem = TypeConverter.translateItemRuntimeId(input, output, data >> 16, data & 0xFFFF);
                 data = newItem[0] << 16 | newItem[1];
-            } else if (type == LevelEvent.PARTICLE_DESTROY_BLOCK) {
+            } else if (BLOCK_BREAK_PARTICLE_EVENTS.contains(type)) {
                 data = TypeConverter.translateBlockRuntimeId(input, output, data);
             } else if (type == LevelEvent.PARTICLE_CRACK_BLOCK) {
                 var face = data >> 24;
