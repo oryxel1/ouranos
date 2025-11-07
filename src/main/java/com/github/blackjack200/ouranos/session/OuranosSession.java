@@ -15,6 +15,13 @@ import org.cloudburstmc.protocol.bedrock.packet.*;
 import java.util.*;
 
 public abstract class OuranosSession {
+    private static final List<ProtocolToProtocol> GLOBAL_TRANSLATORS = new ArrayList<>();
+    static {
+        GLOBAL_TRANSLATORS.add(new GlobalProtocolTranslator());
+        GLOBAL_TRANSLATORS.add(new GlobalWorldTranslator());
+        GLOBAL_TRANSLATORS.add(new GlobalItemTranslator());
+    }
+
     @Getter @Setter
     private long uniqueId, runtimeId;
     @Getter
@@ -35,26 +42,20 @@ public abstract class OuranosSession {
         return (T) this.storages.get(klass);
     }
 
-    private final List<ProtocolToProtocol> defaultTranslators = new ArrayList<>();
-    private final List<ProtocolToProtocol> translators = new ArrayList<>();
-    private final List<ProtocolToProtocol> translatorsReversed;
+    private final List<ProtocolToProtocol> translators = new ArrayList<>(), reversedTranslators;
 
     public OuranosSession(int protocolId, int targetVersion) {
         this.protocolId = protocolId;
         this.targetVersion = targetVersion;
 
-        this.defaultTranslators.add(new GlobalProtocolTranslator());
-        this.defaultTranslators.add(new GlobalWorldTranslator());
-        this.defaultTranslators.add(new GlobalItemTranslator());
-
         this.translators.addAll(ProtocolInfo.getTranslators(targetVersion, protocolId));
-
-        this.defaultTranslators.forEach(translator -> translator.init(this));
         this.translators.forEach(translator -> translator.init(this));
 
-        this.translatorsReversed = new ArrayList<>();
-        this.translatorsReversed.addAll(this.translators);
-        Collections.reverse(this.translatorsReversed);
+        GLOBAL_TRANSLATORS.forEach(translator -> translator.init(this));
+
+        this.reversedTranslators = new ArrayList<>();
+        this.reversedTranslators.addAll(this.translators);
+        Collections.reverse(this.reversedTranslators);
     }
 
     public abstract void sendUpstreamPacket(BedrockPacket packet);
@@ -70,7 +71,7 @@ public abstract class OuranosSession {
         }
 
         final WrappedBedrockPacket wrapped = new WrappedBedrockPacket(this, this.getTargetVersion(), this.getProtocolId(), packet, false);
-        for (ProtocolToProtocol translator : this.defaultTranslators) {
+        for (ProtocolToProtocol translator : GLOBAL_TRANSLATORS) {
             translator.passthroughClientbound(wrapped);
         }
 
@@ -82,11 +83,11 @@ public abstract class OuranosSession {
 
     public final BedrockPacket translateServerbound(BedrockPacket packet) {
         final WrappedBedrockPacket wrapped = new WrappedBedrockPacket(this, this.getProtocolId(), this.getTargetVersion(), packet, false);
-        for (ProtocolToProtocol translator : this.defaultTranslators) {
+        for (ProtocolToProtocol translator : GLOBAL_TRANSLATORS) {
             translator.passthroughServerbound(wrapped);
         }
 
-        for (ProtocolToProtocol translator : this.translatorsReversed) {
+        for (ProtocolToProtocol translator : this.reversedTranslators) {
             translator.passthroughServerbound(wrapped);
         }
         return wrapped.isCancelled() ? null : wrapped.getPacket();
