@@ -18,6 +18,7 @@ import org.cloudburstmc.protocol.bedrock.codec.v465.Bedrock_v465;
 import org.cloudburstmc.protocol.bedrock.codec.v475.Bedrock_v475;
 import org.cloudburstmc.protocol.bedrock.codec.v503.Bedrock_v503;
 import org.cloudburstmc.protocol.bedrock.data.definitions.BlockDefinition;
+import org.cloudburstmc.protocol.bedrock.data.definitions.ItemDefinition;
 import org.cloudburstmc.protocol.bedrock.data.definitions.SimpleItemDefinition;
 import org.cloudburstmc.protocol.bedrock.data.inventory.CreativeItemData;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ItemData;
@@ -38,16 +39,16 @@ public class TypeConverter {
         }
 
         if (itemData.getTag() != null) {
-            var polyfill = ItemTranslator.recoverPolyfillItem(itemData);
+            final ItemData polyfill = ItemTranslator.recoverPolyfillItem(itemData);
             if (polyfill != null) {
                 return polyfill;
             }
         }
 
-        var def = itemData.getDefinition();
+        final ItemDefinition def = itemData.getDefinition();
         var builder = itemData.toBuilder();
 
-        var translatedId = def.getIdentifier();
+        String translatedId = def.getIdentifier();
         if (translatedId.isEmpty()) {
             translatedId = ItemTypeDictionary.getInstance(input).fromIntId(def.getRuntimeId());
         }
@@ -75,13 +76,12 @@ public class TypeConverter {
             }
         }
 
-        var itemDict = ItemTypeDictionary.getInstance(output);
+        final ItemTypeDictionary.InnerEntry itemDict = ItemTypeDictionary.getInstance(output);
         var itemTypeInfo = itemDict.getEntries().getOrDefault(translatedId, null);
         if (itemTypeInfo == null) {
             return ItemTranslator.makePolyfillItem(input, output, itemData);
         }
-        builder.definition(itemTypeInfo.toDefinition(translatedId))
-                .damage(translatedMeta);
+        builder.definition(itemTypeInfo.toDefinition(translatedId)).damage(translatedMeta);
         return builder.build();
     }
 

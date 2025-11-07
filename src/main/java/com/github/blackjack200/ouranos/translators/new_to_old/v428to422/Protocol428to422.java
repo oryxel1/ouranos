@@ -37,7 +37,7 @@ public class Protocol428to422 extends ProtocolToProtocol {
                         case START_BREAK -> PlayerActionType.START_BREAK;
                         case STOP_BREAK -> serverAuth ? PlayerActionType.BLOCK_PREDICT_DESTROY : PlayerActionType.STOP_BREAK;
                         case ABORT_BREAK -> PlayerActionType.ABORT_BREAK;
-                        case CONTINUE_BREAK -> wrapped.session().isServerAuthoritativeBlockBreaking() ? PlayerActionType.BLOCK_CONTINUE_DESTROY : PlayerActionType.CONTINUE_BREAK;
+                        case CONTINUE_BREAK -> serverAuth ? PlayerActionType.BLOCK_CONTINUE_DESTROY : PlayerActionType.CONTINUE_BREAK;
                         default -> null;
                     });
                     data.setBlockPosition(packet.getBlockPosition());

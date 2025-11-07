@@ -40,9 +40,7 @@ public final class ItemTypeDictionary extends AbstractMapping {
                 Map<String, Integer> rawEntries = new Gson().fromJson(reader, new TypeToken<Map<String, Integer>>() {
                 }.getType());
                 var entries = new HashMap<String, ItemTypeInfo>(rawEntries.size());
-                rawEntries.forEach((key, value) -> {
-                    entries.put(key, new ItemTypeInfo(value, false, ItemVersion.LEGACY.ordinal(), null));
-                });
+                rawEntries.forEach((key, value) -> entries.put(key, new ItemTypeInfo(value, false, ItemVersion.LEGACY.ordinal(), null)));
                 return new InnerEntry(entries);
             } catch (IOException e) {
                 throw new RuntimeException(e);

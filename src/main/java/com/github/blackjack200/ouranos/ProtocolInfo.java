@@ -18,6 +18,7 @@ import com.github.blackjack200.ouranos.translators.new_to_old.v712to686.Protocol
 import com.github.blackjack200.ouranos.translators.new_to_old.v729to712.Protocol729to712;
 import com.github.blackjack200.ouranos.translators.new_to_old.v748to729.Protocol748to729;
 import com.github.blackjack200.ouranos.translators.new_to_old.v766to748.Protocol766to748;
+import com.github.blackjack200.ouranos.translators.new_to_old.v776to766.Protocol776to766;
 import com.github.blackjack200.ouranos.translators.new_to_old.v818to800.Protocol818to800;
 import com.github.blackjack200.ouranos.translators.new_to_old.v844to827.Protocol844to827;
 import com.github.blackjack200.ouranos.translators.old_to_new.v408to419.Protocol408to419;
@@ -99,7 +100,7 @@ public final class ProtocolInfo {
         addPacketCodec(Bedrock_v818.CODEC, 231, new Protocol818to800(), null);
         addPacketCodec(Bedrock_v800.CODEC, 231);
         addPacketCodec(Bedrock_v786.CODEC, 231);
-        addPacketCodec(Bedrock_v776.CODEC, 231);
+        addPacketCodec(Bedrock_v776.CODEC, 231, new Protocol776to766(), null);
         addPacketCodec(Bedrock_v766.CODEC, 231, new Protocol766to748(), new Protocol766to776());
         addPacketCodec(Bedrock_v748.CODEC, 221, new Protocol748to729(), null);
         addPacketCodec(Bedrock_v729.CODEC, 211, new Protocol729to712(), null);

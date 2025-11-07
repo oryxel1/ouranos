@@ -73,20 +73,8 @@ public class GlobalItemTranslator extends ProtocolToProtocol {
             final CreativeContentPacket packet = (CreativeContentPacket) wrapped.getPacket();
             final int input = wrapped.getInput(), output = wrapped.getOutput();
 
-            final List<CreativeItemData> contents = new ArrayList<>();
-            for (int i = 0; i < packet.getContents().size(); i++) {
-                final CreativeItemData old = packet.getContents().get(i);
-                contents.add(TypeConverter.translateCreativeItemData(input, output, old));
-            }
-            packet.getContents().clear();
-            packet.getContents().addAll(contents);
-
-            final List<CreativeItemGroup> groups = new ArrayList<>();
-            for (var group : packet.getGroups()) {
-                groups.add(group.toBuilder().icon(TypeConverter.translateItemData(input, output, group.getIcon())).build());
-            }
-            packet.getGroups().clear();
-            packet.getGroups().addAll(groups);
+            packet.getContents().replaceAll(itemData -> TypeConverter.translateCreativeItemData(input, output, itemData));
+            packet.getGroups().replaceAll(group -> group.toBuilder().icon(TypeConverter.translateItemData(input, output, group.getIcon())).build());
         });
 
         this.registerClientbound(AddItemEntityPacket.class, wrapped -> {
@@ -110,6 +98,10 @@ public class GlobalItemTranslator extends ProtocolToProtocol {
         this.registerClientbound(InventoryTransactionPacket.class, this::translateBothWay);
         this.registerClientbound(MobEquipmentPacket.class, this::translateBothWay);
         this.registerClientbound(MobArmorEquipmentPacket.class, this::translateBothWay);
+
+        this.registerServerbound(InventoryTransactionPacket.class, this::translateBothWay);
+        this.registerServerbound(MobEquipmentPacket.class, this::translateBothWay);
+        this.registerServerbound(MobArmorEquipmentPacket.class, this::translateBothWay);
     }
 
     private void translateBothWay(WrappedBedrockPacket wrapped) {
