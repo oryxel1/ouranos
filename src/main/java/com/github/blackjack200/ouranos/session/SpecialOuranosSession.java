@@ -31,7 +31,7 @@ public abstract class SpecialOuranosSession extends OuranosSession {
         this.serverCodecHelper.setBlockDefinitions(new BlockDictionaryRegistry(targetVersion));
     }
 
-    public final Class<? extends BedrockPacket> translateClientbound(ByteBuf input, ByteBuf output, int id) {
+    public final Integer translateClientbound(ByteBuf input, ByteBuf output, int id) {
         BedrockPacket packet = this.serverCodec.tryDecode(this.serverCodecHelper, input, id);
         packet = this.translateClientbound(packet);
         if (packet == null || this.clientCodec.getPacketDefinition(packet.getClass()) == null) {
@@ -39,10 +39,10 @@ public abstract class SpecialOuranosSession extends OuranosSession {
         }
 
         this.clientCodec.tryEncode(this.clientCodecHelper, output, packet);
-        return packet.getClass();
+        return this.clientCodec.getPacketDefinition(packet.getClass()).getId();
     }
 
-    public final Class<? extends BedrockPacket> translateServerbound(ByteBuf input, ByteBuf output, int id) {
+    public final Integer translateServerbound(ByteBuf input, ByteBuf output, int id) {
         BedrockPacket packet = this.clientCodec.tryDecode(this.clientCodecHelper, input, id);
         packet = this.translateServerbound(packet);
         if (packet == null || this.serverCodec.getPacketDefinition(packet.getClass()) == null) {
@@ -50,7 +50,7 @@ public abstract class SpecialOuranosSession extends OuranosSession {
         }
 
         this.serverCodec.tryEncode(this.serverCodecHelper, output, packet);
-        return packet.getClass();
+        return this.serverCodec.getPacketDefinition(packet.getClass()).getId();
     }
 
     public final void encodeClient(final BedrockPacket packet, final ByteBuf output) {
