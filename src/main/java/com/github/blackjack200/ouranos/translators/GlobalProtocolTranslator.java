@@ -73,7 +73,7 @@ public class GlobalProtocolTranslator extends ProtocolToProtocol {
             }
 
             final SetEntityDataPacket packet = (SetEntityDataPacket) wrapped.getPacket();
-            cleanMetadata(storage, packet.getMetadata());
+            packet.setMetadata(cleanMetadata(storage, packet.getMetadata()));
         });
         this.registerClientbound(AddEntityPacket.class, wrapped -> {
             final EntityMetadataStorage storage = wrapped.session().get(EntityMetadataStorage.class);
@@ -82,7 +82,7 @@ public class GlobalProtocolTranslator extends ProtocolToProtocol {
             }
 
             final AddEntityPacket packet = (AddEntityPacket) wrapped.getPacket();
-            cleanMetadata(storage, packet.getMetadata());
+            packet.setMetadata(cleanMetadata(storage, packet.getMetadata()));
         });
         this.registerClientbound(AddPlayerPacket.class, wrapped -> {
             final EntityMetadataStorage storage = wrapped.session().get(EntityMetadataStorage.class);
@@ -91,7 +91,7 @@ public class GlobalProtocolTranslator extends ProtocolToProtocol {
             }
 
             final AddPlayerPacket packet = (AddPlayerPacket) wrapped.getPacket();
-            cleanMetadata(storage, packet.getMetadata());
+            packet.setMetadata(cleanMetadata(storage, packet.getMetadata()));
         });
         this.registerClientbound(AddItemEntityPacket.class, wrapped -> {
             final EntityMetadataStorage storage = wrapped.session().get(EntityMetadataStorage.class);
@@ -100,7 +100,7 @@ public class GlobalProtocolTranslator extends ProtocolToProtocol {
             }
 
             final AddItemEntityPacket packet = (AddItemEntityPacket) wrapped.getPacket();
-            cleanMetadata(storage, packet.getMetadata());
+            packet.setMetadata(cleanMetadata(storage, packet.getMetadata()));
         });
 
         this.registerClientbound(PlayerListPacket.class, wrapped -> {
@@ -121,21 +121,27 @@ public class GlobalProtocolTranslator extends ProtocolToProtocol {
         this.registerServerbound(PlayerSkinPacket.class, playerSkinConsumer);
     }
 
-    private void cleanMetadata(final EntityMetadataStorage storage, EntityDataMap metadata) {
+    private EntityDataMap cleanMetadata(final EntityMetadataStorage storage, EntityDataMap metadata) {
         if (metadata == null) {
-            return;
+            return null;
         }
 
-        for (EntityDataType<?> type : metadata.keySet()) {
-            if (storage.getDataTypeMap().fromType(type) == null) {
-                metadata.remove(type);
+        final EntityDataMap newMetadata = new EntityDataMap();
+        try {
+            for (EntityDataType<?> type : metadata.keySet()) {
+                if (storage.getDataTypeMap().fromType(type) != null) {
+                    newMetadata.put(type, metadata.get(type));
+                }
             }
-        }
 
-        final Set<EntityFlag> flags = metadata.getFlags();
-        if (flags != null) {
-            flags.removeIf(flag -> storage.getFlags().getIdUnsafe(flag) == -1 && storage.getFlags_2().getIdUnsafe(flag) == -1);
+            final Set<EntityFlag> flags = newMetadata.getFlags();
+            if (flags != null) {
+                flags.removeIf(flag -> storage.getFlags().getIdUnsafe(flag) == -1 && storage.getFlags_2().getIdUnsafe(flag) == -1);
+            }
+        } catch (Exception exception) {
+            return metadata;
         }
+        return newMetadata;
     }
 
     private NbtMap downgradeBiomeDefinition(int output, Map<String, BiomeDefinitionData> definitions) {
