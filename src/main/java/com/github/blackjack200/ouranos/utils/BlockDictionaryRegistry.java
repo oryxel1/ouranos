@@ -15,11 +15,11 @@ public class BlockDictionaryRegistry implements DefinitionRegistry<BlockDefiniti
 
     @Override
     public BlockDefinition getDefinition(int runtimeId) {
-        val entry = BlockStateDictionary.getInstance(this.protocol);
-        val hash = entry.toLatestStateHash(runtimeId);
-        val states = entry.lookupStateFromStateHash(hash);
+        final BlockStateDictionary.Dictionary entry = BlockStateDictionary.getInstance(this.protocol);
+        final Integer hash = entry.toLatestStateHash(runtimeId);
+        final BlockStateDictionary.Dictionary.BlockEntry states = entry.lookupStateFromStateHash(hash);
         if (states == null) {
-            return null;
+            return () -> runtimeId; // This is fine.
         }
         return new SimpleBlockDefinition(states.name(), runtimeId, states.rawState());
     }

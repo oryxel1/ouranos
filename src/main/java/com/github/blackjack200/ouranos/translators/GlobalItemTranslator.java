@@ -109,12 +109,10 @@ public class GlobalItemTranslator extends ProtocolToProtocol {
 
         final BedrockPacket bedrockPacket = wrapped.getPacket();
         if (bedrockPacket instanceof InventoryTransactionPacket packet) {
-            final List<InventoryActionData> newActions = new ArrayList<>(packet.getActions().size());
-            for (var action : packet.getActions()) {
-                newActions.add(new InventoryActionData(action.getSource(), action.getSlot(), TypeConverter.translateItemData(input, output, action.getFromItem()), TypeConverter.translateItemData(input, output, action.getToItem()), action.getStackNetworkId()));
+            for (int i = 0; i < packet.getActions().size(); i++) {
+                final InventoryActionData action = packet.getActions().get(i);
+                packet.getActions().set(i, new InventoryActionData(action.getSource(), action.getSlot(), TypeConverter.translateItemData(input, output, action.getFromItem()), TypeConverter.translateItemData(input, output, action.getToItem()), action.getStackNetworkId()));
             }
-            packet.getActions().clear();
-            packet.getActions().addAll(newActions);
 
             if (packet.getBlockDefinition() != null) {
                 packet.setBlockDefinition(TypeConverter.translateBlockDefinition(input, output, packet.getBlockDefinition()));
