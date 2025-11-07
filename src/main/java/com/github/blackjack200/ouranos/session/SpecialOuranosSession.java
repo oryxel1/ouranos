@@ -38,7 +38,7 @@ public abstract class SpecialOuranosSession extends OuranosSession {
             return false;
         }
 
-        this.serverCodec.tryEncode(this.serverCodecHelper, output, packet);
+        this.clientCodec.tryEncode(this.clientCodecHelper, output, packet);
         return true;
     }
 
@@ -49,7 +49,7 @@ public abstract class SpecialOuranosSession extends OuranosSession {
             return false;
         }
 
-        this.clientCodec.tryEncode(this.clientCodecHelper, output, packet);
+        this.serverCodec.tryEncode(this.serverCodecHelper, output, packet);
         return true;
     }
 
