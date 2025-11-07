@@ -4,6 +4,8 @@ import com.github.blackjack200.ouranos.utils.SimpleBlockDefinition;
 import org.cloudburstmc.nbt.NbtMap;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ItemData;
 
+import java.util.Objects;
+
 public class ItemTranslator {
     public static final String POLYFILL_ITEM_TAG = "____Ouranos____";
 
@@ -31,8 +33,14 @@ public class ItemTranslator {
     }
 
     public static ItemData makePolyfillItem(int input, int output, ItemData itemData) {
+        final String oldIdentifier = itemData.getDefinition().getIdentifier();
+        final String mappedIdentifier = ItemIdentifierConverter.translate(oldIdentifier, input, output);
+        final String finalIdentifier = Objects.equals(oldIdentifier, mappedIdentifier) || ItemTypeDictionary.getInstance(output).getEntries().get(mappedIdentifier) == null
+                ? itemData.getBlockDefinition() == null || itemData.getBlockDefinition().getRuntimeId() == 0 ? "minecraft:paper" : "minecraft:barrier" : mappedIdentifier;
+
         var def = itemData.getDefinition();
-        var polyfillItem = ItemData.builder().usingNetId(itemData.isUsingNetId()).netId(itemData.getNetId()).count(itemData.getCount()).damage(0).definition(ItemTypeDictionary.getInstance(output).getEntries().get("minecraft:barrier").toDefinition("minecraft:barrier"));
+        var polyfillItem = ItemData.builder().usingNetId(itemData.isUsingNetId()).netId(itemData.getNetId()).count(itemData.getCount()).damage(0).
+                definition(ItemTypeDictionary.getInstance(output).getEntries().get(finalIdentifier).toDefinition(finalIdentifier));
         var polyfillData = NbtMap.builder()
                 .putInt("Source", input)
                 .putInt("Meta", itemData.getDamage())
