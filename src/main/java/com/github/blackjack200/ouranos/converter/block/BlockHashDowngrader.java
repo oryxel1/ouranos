@@ -1,9 +1,15 @@
 package com.github.blackjack200.ouranos.converter.block;
 
 import com.github.blackjack200.ouranos.converter.BlockStateDictionary;
+import com.github.blackjack200.ouranos.converter.block.impl.BlockHashDowngrader766to748;
 import com.github.blackjack200.ouranos.converter.block.impl.BlockHashDowngrader786to776;
+import com.github.blackjack200.ouranos.converter.block.impl.BlockHashDowngrader818to800;
+import com.github.blackjack200.ouranos.converter.block.impl.BlockHashDowngrader844to827;
 import com.github.blackjack200.ouranos.utils.HashUtils;
+import org.cloudburstmc.protocol.bedrock.codec.v766.Bedrock_v766;
 import org.cloudburstmc.protocol.bedrock.codec.v786.Bedrock_v786;
+import org.cloudburstmc.protocol.bedrock.codec.v818.Bedrock_v818;
+import org.cloudburstmc.protocol.bedrock.codec.v844.Bedrock_v844;
 
 import java.util.Map;
 import java.util.TreeMap;
@@ -15,7 +21,10 @@ public class BlockHashDowngrader {
     }
 
     static {
+        CONVERTERS.put(Bedrock_v844.CODEC.getProtocolVersion(), BlockHashDowngrader844to827::downgradeState);
+        CONVERTERS.put(Bedrock_v818.CODEC.getProtocolVersion(), BlockHashDowngrader818to800::downgradeState);
         CONVERTERS.put(Bedrock_v786.CODEC.getProtocolVersion(), BlockHashDowngrader786to776::downgradeState);
+        CONVERTERS.put(Bedrock_v766.CODEC.getProtocolVersion(), BlockHashDowngrader766to748::downgradeState);
     }
 
     public static Integer downgradeHash(BlockStateDictionary.Dictionary.BlockEntry entry, int input, int output) {

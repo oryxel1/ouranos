@@ -24,7 +24,7 @@ public final class BlockStateDictionary extends AbstractMapping {
         @Getter
         private Integer fallbackRuntimeId;
         @Getter
-        private Integer fallbackCurrentStateHash;
+        private Integer fallbackLatestStateHash;
         @Getter
         private final List<BlockEntry> knownStates;
 
@@ -43,7 +43,7 @@ public final class BlockStateDictionary extends AbstractMapping {
             for (val v : this.latestStateHashToEntry.entrySet()) {
                 if (v.getValue().name.equals("minecraft:info_update")) {
                     this.fallbackRuntimeId = this.toRuntimeId(v.getKey());
-                    this.fallbackCurrentStateHash = v.getValue().currentStateHash;
+                    this.fallbackLatestStateHash = v.getValue().latestStateHash;
                     break;
                 }
             }

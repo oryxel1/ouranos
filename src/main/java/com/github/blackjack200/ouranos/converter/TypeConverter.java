@@ -255,13 +255,17 @@ public class TypeConverter {
 
         BlockStateDictionary.Dictionary.BlockEntry entry = idAreHashes ? inputDict.toBlockStateHash(blockRuntimeId) : inputDict.toBlockState(blockRuntimeId);
         if (entry == null) {
-            return idAreHashes ? blockRuntimeId : outputDict.getFallbackRuntimeId();
+            return idAreHashes ? outputDict.getFallbackLatestStateHash() : outputDict.getFallbackRuntimeId();
         }
 
         Integer stateHash = BlockHashDowngrader.downgradeHash(entry, input, output);
         if (stateHash == null) { // Not possible, but why not make it safe :)
-            return outputDict.getFallbackRuntimeId();
+            return idAreHashes ? outputDict.getFallbackLatestStateHash() : outputDict.getFallbackRuntimeId();
         }
+        if (idAreHashes) {
+            return stateHash;
+        }
+
         Integer translated = outputDict.toRuntimeId(stateHash);
         return translated == null ? outputDict.getFallbackRuntimeId() : translated;
     }
