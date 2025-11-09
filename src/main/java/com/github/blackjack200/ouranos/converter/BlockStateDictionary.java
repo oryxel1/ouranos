@@ -76,6 +76,10 @@ public final class BlockStateDictionary extends AbstractMapping {
             return this.latestStateHashToEntry.get(this.runtimeToLatestStateHash.get(runtimeId));
         }
 
+        public BlockEntry toBlockStateHash(int hashId) {
+            return this.latestStateHashToEntry.get(hashId);
+        }
+
         /**
          * Returns the state ID associated with a given blockstate data.
          *
@@ -95,7 +99,7 @@ public final class BlockStateDictionary extends AbstractMapping {
             return this.latestStateHashToEntry.get(stateHash);
         }
 
-        public record BlockEntry(String name, String newName, NbtMap rawState, int latestStateHash,
+        public record BlockEntry(String name, NbtMap rawState, int latestStateHash,
                                  int currentStateHash) {
         }
 
@@ -112,13 +116,13 @@ public final class BlockStateDictionary extends AbstractMapping {
                             var rawState = (NbtMap) entry.get("block");
                             var state = hackedUpgradeBlockState(rawState, BlockStateUpdaters.LATEST_VERSION);
                             var latestStateHash = HashUtils.computeBlockStateHash(state);
-                            list.put(list.size(), new BlockEntry(rawState.getString("name"), state.getString("name"), rawState, latestStateHash, HashUtils.computeBlockStateHash(rawState)));
+                            list.put(list.size(), new BlockEntry(rawState.getString("name"), rawState, latestStateHash, HashUtils.computeBlockStateHash(rawState)));
                         }
                     } else if (rawTag instanceof NbtMap rawState) {
                         //TODO HACK! blame on BlockStateUpdaters
                         var state = hackedUpgradeBlockState(rawState, BlockStateUpdaters.LATEST_VERSION);
                         var latestStateHash = HashUtils.computeBlockStateHash(state.getString("name"), state);
-                        list.put(list.size(), new BlockEntry(rawState.getString("name"), state.getString("name"), rawState, latestStateHash, HashUtils.computeBlockStateHash(rawState)));
+                        list.put(list.size(), new BlockEntry(rawState.getString("name"), rawState, latestStateHash, HashUtils.computeBlockStateHash(rawState)));
                     }
                 }
                 return new Dictionary(list);

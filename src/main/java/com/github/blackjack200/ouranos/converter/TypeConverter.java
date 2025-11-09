@@ -1,5 +1,6 @@
 package com.github.blackjack200.ouranos.converter;
 
+import com.github.blackjack200.ouranos.converter.block.BlockHashDowngrader;
 import com.github.blackjack200.ouranos.data.bedrock.GlobalItemDataHandlers;
 import com.github.blackjack200.ouranos.converter.palette.Palette;
 import com.github.blackjack200.ouranos.utils.SimpleBlockDefinition;
@@ -21,7 +22,6 @@ import org.cloudburstmc.protocol.bedrock.data.definitions.BlockDefinition;
 import org.cloudburstmc.protocol.bedrock.data.definitions.ItemDefinition;
 import org.cloudburstmc.protocol.bedrock.data.definitions.SimpleItemDefinition;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ItemData;
-import org.cloudburstmc.protocol.bedrock.data.inventory.descriptor.*;
 
 import java.util.ArrayList;
 
@@ -253,12 +253,13 @@ public class TypeConverter {
         val inputDict = BlockStateDictionary.getInstance(input);
         val outputDict = BlockStateDictionary.getInstance(output);
 
-        Integer stateHash = blockRuntimeId;
-        if (!idAreHashes) {
-            stateHash = inputDict.toLatestStateHash(blockRuntimeId);
+        BlockStateDictionary.Dictionary.BlockEntry entry = idAreHashes ? inputDict.toBlockStateHash(blockRuntimeId) : inputDict.toBlockState(blockRuntimeId);
+        if (entry == null) {
+            return idAreHashes ? blockRuntimeId : outputDict.getFallbackRuntimeId();
         }
 
-        if (stateHash == null) {
+        Integer stateHash = BlockHashDowngrader.downgradeHash(entry, input, output);
+        if (stateHash == null) { // Not possible, but why not make it safe :)
             return outputDict.getFallbackRuntimeId();
         }
         Integer translated = outputDict.toRuntimeId(stateHash);
