@@ -29,6 +29,10 @@ public abstract class OuranosSession {
 
     @Getter
     private boolean serverAuthoritativeInventories, serverAuthoritativeBlockBreaking;
+
+    @Getter @Setter
+    private boolean hashedBlockIds;
+
     @Getter
     private AuthoritativeMovementMode authoritativeMovementMode;
 
@@ -68,6 +72,7 @@ public abstract class OuranosSession {
             this.serverAuthoritativeInventories = startGamePacket.isInventoriesServerAuthoritative();
             this.authoritativeMovementMode = startGamePacket.getAuthoritativeMovementMode();
             this.serverAuthoritativeBlockBreaking = startGamePacket.isServerAuthoritativeBlockBreaking();
+            setHashedBlockIds(startGamePacket.isBlockNetworkIdsHashed());
         }
 
         final WrappedBedrockPacket wrapped = new WrappedBedrockPacket(this, this.getTargetVersion(), this.getProtocolId(), packet, false);

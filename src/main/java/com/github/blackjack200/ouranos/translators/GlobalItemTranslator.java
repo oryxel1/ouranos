@@ -53,7 +53,7 @@ public class GlobalItemTranslator extends ProtocolToProtocol {
 
         this.registerClientbound(InventoryContentPacket.class, wrapped -> {
             final InventoryContentPacket packet = (InventoryContentPacket) wrapped.getPacket();
-            packet.getContents().replaceAll(itemData -> TypeConverter.translateItemData(wrapped.getInput(), wrapped.getOutput(), itemData));
+            packet.getContents().replaceAll(itemData -> TypeConverter.translateItemData(wrapped.session().isHashedBlockIds(), wrapped.getInput(), wrapped.getOutput(), itemData));
         });
 
         this.registerClientbound(ItemComponentPacket.class, wrapped -> {
@@ -92,20 +92,20 @@ public class GlobalItemTranslator extends ProtocolToProtocol {
 
         this.registerClientbound(AddItemEntityPacket.class, wrapped -> {
             final AddItemEntityPacket packet = (AddItemEntityPacket) wrapped.getPacket();
-            packet.setItemInHand(TypeConverter.translateItemData(wrapped.getInput(), wrapped.getOutput(), packet.getItemInHand()));
+            packet.setItemInHand(TypeConverter.translateItemData(wrapped.session().isHashedBlockIds(), wrapped.getInput(), wrapped.getOutput(), packet.getItemInHand()));
         });
 
         this.registerClientbound(InventorySlotPacket.class, wrapped -> {
             final InventorySlotPacket packet = (InventorySlotPacket) wrapped.getPacket();
             final int input = wrapped.getInput(), output = wrapped.getOutput();
 
-            packet.setItem(TypeConverter.translateItemData(input, output, packet.getItem()));
-            packet.setStorageItem(TypeConverter.translateItemData(input, output, packet.getStorageItem()));
+            packet.setItem(TypeConverter.translateItemData(wrapped.session().isHashedBlockIds(), input, output, packet.getItem()));
+            packet.setStorageItem(TypeConverter.translateItemData(wrapped.session().isHashedBlockIds(), input, output, packet.getStorageItem()));
         });
 
         this.registerClientbound(AddPlayerPacket.class, wrapped -> {
             final AddPlayerPacket packet = (AddPlayerPacket) wrapped.getPacket();
-            packet.setHand(TypeConverter.translateItemData(wrapped.getInput(), wrapped.getOutput(), packet.getHand()));
+            packet.setHand(TypeConverter.translateItemData(wrapped.session().isHashedBlockIds(), wrapped.getInput(), wrapped.getOutput(), packet.getHand()));
         });
 
         this.registerClientbound(InventoryTransactionPacket.class, this::translateBothWay);
@@ -124,25 +124,25 @@ public class GlobalItemTranslator extends ProtocolToProtocol {
         if (bedrockPacket instanceof InventoryTransactionPacket packet) {
             for (int i = 0; i < packet.getActions().size(); i++) {
                 final InventoryActionData action = packet.getActions().get(i);
-                packet.getActions().set(i, new InventoryActionData(action.getSource(), action.getSlot(), TypeConverter.translateItemData(input, output, action.getFromItem()), TypeConverter.translateItemData(input, output, action.getToItem()), action.getStackNetworkId()));
+                packet.getActions().set(i, new InventoryActionData(action.getSource(), action.getSlot(), TypeConverter.translateItemData(wrapped.session().isHashedBlockIds(), input, output, action.getFromItem()), TypeConverter.translateItemData(wrapped.session().isHashedBlockIds(), input, output, action.getToItem()), action.getStackNetworkId()));
             }
 
             if (packet.getBlockDefinition() != null) {
-                packet.setBlockDefinition(TypeConverter.translateBlockDefinition(input, output, packet.getBlockDefinition()));
+                packet.setBlockDefinition(TypeConverter.translateBlockDefinition(wrapped.session().isHashedBlockIds(), input, output, packet.getBlockDefinition()));
             }
             if (packet.getItemInHand() != null) {
-                packet.setItemInHand(TypeConverter.translateItemData(input, output, packet.getItemInHand()));
+                packet.setItemInHand(TypeConverter.translateItemData(wrapped.session().isHashedBlockIds(), input, output, packet.getItemInHand()));
             }
         } else if (bedrockPacket instanceof MobEquipmentPacket packet) {
-            packet.setItem(TypeConverter.translateItemData(input, output, packet.getItem()));
+            packet.setItem(TypeConverter.translateItemData(wrapped.session().isHashedBlockIds(), input, output, packet.getItem()));
         } else if (bedrockPacket instanceof MobArmorEquipmentPacket packet) {
             if (packet.getBody() != null) {
-                packet.setBody(TypeConverter.translateItemData(input, output, packet.getBody()));
+                packet.setBody(TypeConverter.translateItemData(wrapped.session().isHashedBlockIds(), input, output, packet.getBody()));
             }
-            packet.setChestplate(TypeConverter.translateItemData(input, output, packet.getChestplate()));
-            packet.setHelmet(TypeConverter.translateItemData(input, output, packet.getHelmet()));
-            packet.setBoots(TypeConverter.translateItemData(input, output, packet.getBoots()));
-            packet.setLeggings(TypeConverter.translateItemData(input, output, packet.getLeggings()));
+            packet.setChestplate(TypeConverter.translateItemData(wrapped.session().isHashedBlockIds(), input, output, packet.getChestplate()));
+            packet.setHelmet(TypeConverter.translateItemData(wrapped.session().isHashedBlockIds(), input, output, packet.getHelmet()));
+            packet.setBoots(TypeConverter.translateItemData(wrapped.session().isHashedBlockIds(), input, output, packet.getBoots()));
+            packet.setLeggings(TypeConverter.translateItemData(wrapped.session().isHashedBlockIds(), input, output, packet.getLeggings()));
         }
     }
 

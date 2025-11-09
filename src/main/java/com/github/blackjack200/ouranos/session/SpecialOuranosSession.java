@@ -27,8 +27,14 @@ public abstract class SpecialOuranosSession extends OuranosSession {
         this.clientCodecHelper = this.clientCodec.createHelper();
         this.serverCodecHelper = this.serverCodec.createHelper();
 
-        this.clientCodecHelper.setBlockDefinitions(new BlockDictionaryRegistry(protocolId));
-        this.serverCodecHelper.setBlockDefinitions(new BlockDictionaryRegistry(targetVersion));
+        this.clientCodecHelper.setBlockDefinitions(new BlockDictionaryRegistry(protocolId, false));
+        this.serverCodecHelper.setBlockDefinitions(new BlockDictionaryRegistry(targetVersion, false));
+    }
+
+    @Override
+    public void setHashedBlockIds(boolean hashedBlockIds) {
+        this.clientCodecHelper.setBlockDefinitions(new BlockDictionaryRegistry(this.getProtocolId(), hashedBlockIds));
+        this.serverCodecHelper.setBlockDefinitions(new BlockDictionaryRegistry(this.getTargetVersion(), hashedBlockIds));
     }
 
     public final Integer translateClientbound(ByteBuf input, ByteBuf output, int id) {

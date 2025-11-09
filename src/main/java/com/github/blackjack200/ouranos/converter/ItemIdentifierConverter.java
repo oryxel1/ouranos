@@ -2,12 +2,10 @@ package com.github.blackjack200.ouranos.converter;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import org.cloudburstmc.protocol.bedrock.codec.v729.Bedrock_v729;
 import org.cloudburstmc.protocol.bedrock.codec.v748.Bedrock_v748;
 import org.cloudburstmc.protocol.bedrock.codec.v766.Bedrock_v766;
 import org.cloudburstmc.protocol.bedrock.codec.v776.Bedrock_v776;
 import org.cloudburstmc.protocol.bedrock.codec.v800.Bedrock_v800;
-import org.cloudburstmc.protocol.bedrock.codec.v818.Bedrock_v818;
 import org.cloudburstmc.protocol.bedrock.codec.v827.Bedrock_v827;
 import org.cloudburstmc.protocol.bedrock.codec.v844.Bedrock_v844;
 
@@ -24,7 +22,6 @@ public class ItemIdentifierConverter {
         ID_TO_ITEMS.put(Bedrock_v766.CODEC.getProtocolVersion(), loadItemMappingsFromFile("itemIdentifiers_v766to748.json"));
         ID_TO_ITEMS.put(Bedrock_v748.CODEC.getProtocolVersion(), loadItemMappingsFromFile("itemIdentifiers_v748to729.json"));
     }
-
 
     public static String translate(String identifier, int target, int client) {
         if (target <= client) {
