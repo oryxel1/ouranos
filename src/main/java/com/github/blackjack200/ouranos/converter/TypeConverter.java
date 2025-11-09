@@ -205,17 +205,15 @@ public class TypeConverter {
     }
 
     private int getDimensionChunkBounds(int protocol, int dimension) {
-        switch (dimension) {
-            case 0://overworld
-                return protocol >= Bedrock_v503.CODEC.getProtocolVersion() ? 24 : 25;
-            case 1://nether
-                return 8;
-            case 2://the_end
-                return 16;
-            default:
-//                log.debug("Unknown dimension for chunk bounds: {}", dimension);
-                return protocol >= Bedrock_v503.CODEC.getProtocolVersion() ? 24 : 25;
-        }
+        return switch (dimension) {
+            case 0 ->//overworld
+                    protocol >= Bedrock_v503.CODEC.getProtocolVersion() ? 24 : 25;
+            case 1 ->//nether
+                    8;
+            case 2 ->//the_end
+                    16;
+            default -> protocol >= Bedrock_v503.CODEC.getProtocolVersion() ? 24 : 25;
+        };
     }
 
     public static void rewriteSubChunk(int input, int output, ByteBuf from, ByteBuf to) throws ChunkRewriteException {
@@ -249,20 +247,19 @@ public class TypeConverter {
     }
 
     public int translateBlockRuntimeId(int input, int output, int blockRuntimeId) {
-        val inputDict = BlockStateDictionary.getInstance(input);
-        val outputDict = BlockStateDictionary.getInstance(output);
+        BlockStateDictionary.Dictionary inputDict = BlockStateDictionary.getInstance(input);
+        BlockStateDictionary.Dictionary outputDict = BlockStateDictionary.getInstance(output);
 
-        val stateHash = inputDict.toLatestStateHash(blockRuntimeId);
-
+        Integer stateHash = inputDict.toLatestStateHash(blockRuntimeId);
         if (stateHash == null) {
             return outputDict.getFallbackRuntimeId();
         }
 
-        var translated = outputDict.toRuntimeId(stateHash);
-        if (translated == null) {
-            return outputDict.getFallbackRuntimeId();
-        }
-        return translated;
+        Integer translated = outputDict.toRuntimeId(stateHash);
+//        if (translated == null) {
+//            return outputDict.getFallbackRuntimeId();
+//        }
+        return translated == null ? outputDict.getFallbackRuntimeId() : translated;
     }
 
     public BlockDefinition translateBlockDefinition(int input, int output, BlockDefinition definition) {

@@ -40,7 +40,7 @@ public class ItemTranslator {
 
         var def = itemData.getDefinition();
         var polyfillItem = ItemData.builder().usingNetId(itemData.isUsingNetId()).netId(itemData.getNetId()).count(itemData.getCount()).damage(0).
-                definition(ItemTypeDictionary.getInstance(output).getEntries().get(finalIdentifier).toDefinition(finalIdentifier));
+                tag(itemData.getTag()).definition(ItemTypeDictionary.getInstance(output).getEntries().get(finalIdentifier).toDefinition(finalIdentifier));
         var polyfillData = NbtMap.builder()
                 .putInt("Source", input)
                 .putInt("Meta", itemData.getDamage())
