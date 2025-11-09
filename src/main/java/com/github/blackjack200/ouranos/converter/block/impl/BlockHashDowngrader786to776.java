@@ -15,9 +15,9 @@ public class BlockHashDowngrader786to776 {
             case "minecraft:bush" ->
                     new BlockStateDictionary.Dictionary.BlockEntry("minecraft:sweet_berry_bush", NbtMap.builder().putInt("growth", 0).build(), -1, -1);
             case "minecraft:tall_dry_grass", "minecraft:short_dry_grass" ->
-                    new BlockStateDictionary.Dictionary.BlockEntry("minecraft:dead_tube_coral_fan", NbtMap.builder().putInt("coral_fan_direction", 0).build(), -1, -1);
+                    new BlockStateDictionary.Dictionary.BlockEntry("minecraft:fire_tube_coral_fan", NbtMap.builder().putInt("coral_fan_direction", 0).build(), -1, -1);
             case "minecraft:cactus_flower" ->
-                    new BlockStateDictionary.Dictionary.BlockEntry("minecraft:tube_coral_fan", NbtMap.builder().putInt("coral_fan_direction", 0).build(), -1, -1);
+                    new BlockStateDictionary.Dictionary.BlockEntry("minecraft:brain_coral_fan", NbtMap.builder().putInt("coral_fan_direction", 0).build(), -1, -1);
             default -> entry;
         };
 
