@@ -10,6 +10,8 @@ import org.cloudburstmc.protocol.bedrock.data.PlayerBlockActionData;
 import org.cloudburstmc.protocol.bedrock.packet.PlayerActionPacket;
 import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket;
 
+import java.util.Objects;
+
 public class Protocol428to422 extends ProtocolToProtocol {
     @Override
     public void init(OuranosSession session) {
@@ -39,10 +41,33 @@ public class Protocol428to422 extends ProtocolToProtocol {
                         case CONTINUE_BREAK -> serverAuth ? PlayerActionType.BLOCK_CONTINUE_DESTROY : PlayerActionType.CONTINUE_BREAK;
                         default -> null;
                     });
-                    data.setBlockPosition(packet.getBlockPosition());
-                    data.setFace(packet.getFace());
 
+//                    System.out.println(packet);
+
+                    data.setFace(packet.getFace());
+                    boolean reset = false;
+                    if (actionType == PlayerActionType.CONTINUE_BREAK) {
+                        if (storage.getPosition() == null) { // Seems to be happening in some weird case?
+                            data.setAction(PlayerActionType.START_BREAK);
+                        }
+
+                        storage.setPosition(packet.getBlockPosition());
+                        storage.setFace(packet.getFace());
+                    } else if (actionType == PlayerActionType.START_BREAK) {
+                        storage.setPosition(packet.getBlockPosition());
+                        storage.setFace(packet.getFace());
+                    } else {
+                        data.setFace(storage.getFace());
+                        reset = true;
+                    }
+
+                    data.setBlockPosition(Objects.requireNonNullElse(storage.getPosition(), packet.getBlockPosition())); // not a typo.
                     storage.getBlockInteractions().add(data);
+//                    System.out.println(data);
+
+                    if (reset) {
+                        storage.setPosition(null); // Finish breaking, reset!
+                    }
 
                     wrapped.cancel();
                 }

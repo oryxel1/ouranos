@@ -32,6 +32,7 @@ public class BlockHashDowngrader {
             return entry.latestStateHash();
         }
 
+        final BlockStateDictionary.Dictionary.BlockEntry oldEntry = entry;
         for (Map.Entry<Integer, Processor> mapper : CONVERTERS.descendingMap().entrySet()) {
             final int protocolVersion = mapper.getKey();
             if (protocolVersion < output) {
@@ -44,6 +45,6 @@ public class BlockHashDowngrader {
             entry = mapper.getValue().process(entry);
         }
 
-        return HashUtils.computeBlockStateHash(entry.name(), entry.rawState());
+        return entry == oldEntry ? oldEntry.latestStateHash() : HashUtils.computeBlockStateHash(entry.name(), entry.rawState());
     }
 }
