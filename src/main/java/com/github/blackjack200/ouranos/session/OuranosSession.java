@@ -3,6 +3,7 @@ package com.github.blackjack200.ouranos.session;
 import com.github.blackjack200.ouranos.ProtocolInfo;
 import com.github.blackjack200.ouranos.base.ProtocolToProtocol;
 import com.github.blackjack200.ouranos.base.WrappedBedrockPacket;
+import com.github.blackjack200.ouranos.session.storage.BlockDictionaryStorage;
 import com.github.blackjack200.ouranos.translators.GlobalItemTranslator;
 import com.github.blackjack200.ouranos.translators.GlobalProtocolTranslator;
 import com.github.blackjack200.ouranos.translators.GlobalWorldTranslator;
@@ -73,6 +74,8 @@ public abstract class OuranosSession {
             this.authoritativeMovementMode = startGamePacket.getAuthoritativeMovementMode();
             this.serverAuthoritativeBlockBreaking = startGamePacket.isServerAuthoritativeBlockBreaking();
             setHashedBlockIds(startGamePacket.isBlockNetworkIdsHashed());
+
+            put(new BlockDictionaryStorage(this, startGamePacket.getBlockProperties()));
         }
 
         final WrappedBedrockPacket wrapped = new WrappedBedrockPacket(this, this.getTargetVersion(), this.getProtocolId(), packet, false);

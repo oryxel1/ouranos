@@ -34,7 +34,7 @@ public class GlobalWorldTranslator extends ProtocolToProtocol {
     protected void registerProtocol() {
         this.registerClientbound(UpdateBlockPacket.class, wrapped -> {
             final UpdateBlockPacket packet = (UpdateBlockPacket) wrapped.getPacket();
-            packet.setDefinition(new SimpleBlockDefinition(TypeConverter.translateBlockRuntimeId(wrapped.session().isHashedBlockIds(), wrapped.getInput(), wrapped.getOutput(), packet.getDefinition().getRuntimeId())));
+            packet.setDefinition(new SimpleBlockDefinition(TypeConverter.translateBlockRuntimeId(wrapped.session(), wrapped.getInput(), wrapped.getOutput(), packet.getDefinition().getRuntimeId())));
         });
 
         this.registerClientbound(LevelEventPacket.class, wrapped -> {
@@ -45,14 +45,14 @@ public class GlobalWorldTranslator extends ProtocolToProtocol {
             int data = packet.getData();
 
             if (type == ParticleType.ICON_CRACK) {
-                var newItem = TypeConverter.translateItemRuntimeId(wrapped.session().isHashedBlockIds(), input, output, data >> 16, data & 0xFFFF);
+                var newItem = TypeConverter.translateItemRuntimeId(wrapped.session(), input, output, data >> 16, data & 0xFFFF);
                 data = newItem[0] << 16 | newItem[1];
             } else if (BLOCK_BREAK_PARTICLE_EVENTS.contains(type)) {
-                data = TypeConverter.translateBlockRuntimeId(wrapped.session().isHashedBlockIds(), input, output, data);
+                data = TypeConverter.translateBlockRuntimeId(wrapped.session(), input, output, data);
             } else if (type == LevelEvent.PARTICLE_CRACK_BLOCK) {
                 var face = data >> 24;
                 var runtimeId = data & ~(face << 24);
-                data = TypeConverter.translateBlockRuntimeId(wrapped.session().isHashedBlockIds(), input, output, runtimeId) | face << 24;
+                data = TypeConverter.translateBlockRuntimeId(wrapped.session(), input, output, runtimeId) | face << 24;
             }
             packet.setData(data);
         });
@@ -61,7 +61,7 @@ public class GlobalWorldTranslator extends ProtocolToProtocol {
             final LevelSoundEventPacket packet = (LevelSoundEventPacket) wrapped.getPacket();
             final SoundEvent sound = packet.getSound();
             if (sound == SoundEvent.PLACE || sound == SoundEvent.BREAK_BLOCK || sound == SoundEvent.ITEM_USE_ON) {
-                packet.setExtraData(TypeConverter.translateBlockRuntimeId(wrapped.session().isHashedBlockIds(), wrapped.getInput(), wrapped.getOutput(), packet.getExtraData()));
+                packet.setExtraData(TypeConverter.translateBlockRuntimeId(wrapped.session(), wrapped.getInput(), wrapped.getOutput(), packet.getExtraData()));
             }
         });
 
@@ -69,7 +69,7 @@ public class GlobalWorldTranslator extends ProtocolToProtocol {
             final EntityEventPacket packet = (EntityEventPacket) wrapped.getPacket();
             if (packet.getType() == EntityEventType.EATING_ITEM) {
                 final int data = packet.getData();
-                int[] newItem = TypeConverter.translateItemRuntimeId(wrapped.session().isHashedBlockIds(), wrapped.getInput(), wrapped.getOutput(), data >> 16, data & 0xFFFF);
+                int[] newItem = TypeConverter.translateItemRuntimeId(wrapped.session(), wrapped.getInput(), wrapped.getOutput(), data >> 16, data & 0xFFFF);
                 packet.setData((newItem[0] << 16) | newItem[1]);
             }
         });
@@ -84,7 +84,7 @@ public class GlobalWorldTranslator extends ProtocolToProtocol {
             final EntityDataMap data = packet.getMetadata();
             final Integer runtimeId = data.get(EntityDataTypes.VARIANT);
             if (runtimeId != null) {
-                data.put(EntityDataTypes.VARIANT, TypeConverter.translateBlockRuntimeId(wrapped.session().isHashedBlockIds(), wrapped.getInput(), wrapped.getOutput(), runtimeId));
+                data.put(EntityDataTypes.VARIANT, TypeConverter.translateBlockRuntimeId(wrapped.session(), wrapped.getInput(), wrapped.getOutput(), runtimeId));
             }
         });
 
@@ -93,14 +93,14 @@ public class GlobalWorldTranslator extends ProtocolToProtocol {
 
             final List<BlockChangeEntry> newExtraBlocks = new ArrayList<>(packet.getExtraBlocks().size());
             for (final BlockChangeEntry entry : packet.getExtraBlocks()) {
-                newExtraBlocks.add(new BlockChangeEntry(entry.getPosition(), TypeConverter.translateBlockDefinition(wrapped.session().isHashedBlockIds(), wrapped.getInput(), wrapped.getOutput(), entry.getDefinition()), entry.getUpdateFlags(), entry.getMessageEntityId(), entry.getMessageType()));
+                newExtraBlocks.add(new BlockChangeEntry(entry.getPosition(), TypeConverter.translateBlockDefinition(wrapped.session(), wrapped.getInput(), wrapped.getOutput(), entry.getDefinition()), entry.getUpdateFlags(), entry.getMessageEntityId(), entry.getMessageType()));
             }
             packet.getExtraBlocks().clear();
             packet.getExtraBlocks().addAll(newExtraBlocks);
 
             final List<BlockChangeEntry> newStandardBlock = new ArrayList<>(packet.getStandardBlocks().size());
             for (final BlockChangeEntry entry : packet.getStandardBlocks()) {
-                newStandardBlock.add(new BlockChangeEntry(entry.getPosition(), TypeConverter.translateBlockDefinition(wrapped.session().isHashedBlockIds(), wrapped.getInput(), wrapped.getOutput(), entry.getDefinition()), entry.getUpdateFlags(), entry.getMessageEntityId(), entry.getMessageType()));
+                newStandardBlock.add(new BlockChangeEntry(entry.getPosition(), TypeConverter.translateBlockDefinition(wrapped.session(), wrapped.getInput(), wrapped.getOutput(), entry.getDefinition()), entry.getUpdateFlags(), entry.getMessageEntityId(), entry.getMessageType()));
             }
             packet.getStandardBlocks().clear();
             packet.getStandardBlocks().addAll(newStandardBlock);
@@ -112,7 +112,7 @@ public class GlobalWorldTranslator extends ProtocolToProtocol {
             final ByteBuf from = packet.getData();
             final ByteBuf to = AbstractByteBufAllocator.DEFAULT.buffer(from.readableBytes()).touch();
             try {
-                var newSubChunkCount = TypeConverter.rewriteFullChunk(wrapped.session().isHashedBlockIds(), wrapped.getInput(), wrapped.getOutput(), from, to, packet.getDimension(), packet.getSubChunksLength());
+                var newSubChunkCount = TypeConverter.rewriteFullChunk(wrapped.session(), wrapped.getInput(), wrapped.getOutput(), from, to, packet.getDimension(), packet.getSubChunksLength());
                 packet.setSubChunksLength(newSubChunkCount);
                 packet.setData(to.retain());
             } catch (ChunkRewriteException ignored) {
@@ -130,7 +130,7 @@ public class GlobalWorldTranslator extends ProtocolToProtocol {
                     final ByteBuf from = subChunk.getData();
                     final ByteBuf to = AbstractByteBufAllocator.DEFAULT.buffer(from.readableBytes());
                     try {
-                        TypeConverter.rewriteSubChunk(wrapped.session().isHashedBlockIds(), wrapped.getInput(), wrapped.getOutput(), from, to);
+                        TypeConverter.rewriteSubChunk(wrapped.session(), wrapped.getInput(), wrapped.getOutput(), from, to);
                         TypeConverter.rewriteBlockEntities(wrapped.getInput(), wrapped.getOutput(), from, to);
                         to.writeBytes(from);
                         subChunk.setData(to.retain());

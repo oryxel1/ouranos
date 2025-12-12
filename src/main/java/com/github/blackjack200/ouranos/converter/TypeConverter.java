@@ -3,6 +3,8 @@ package com.github.blackjack200.ouranos.converter;
 import com.github.blackjack200.ouranos.converter.block.BlockHashDowngrader;
 import com.github.blackjack200.ouranos.data.bedrock.GlobalItemDataHandlers;
 import com.github.blackjack200.ouranos.converter.palette.Palette;
+import com.github.blackjack200.ouranos.session.OuranosSession;
+import com.github.blackjack200.ouranos.session.storage.BlockDictionaryStorage;
 import com.github.blackjack200.ouranos.utils.SimpleBlockDefinition;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
@@ -28,12 +30,12 @@ import java.util.ArrayList;
 
 @UtilityClass
 public class TypeConverter {
-    public int[] translateItemRuntimeId(boolean hashedBlockIds, int input, int output, int runtimeId, int meta) {
-        var newItem = TypeConverter.translateItemData(hashedBlockIds, input, output, ItemData.builder().definition(new SimpleItemDefinition("", runtimeId, false)).damage(meta).count(1).build());
+    public int[] translateItemRuntimeId(OuranosSession session, int input, int output, int runtimeId, int meta) {
+        var newItem = TypeConverter.translateItemData(session, input, output, ItemData.builder().definition(new SimpleItemDefinition("", runtimeId, false)).damage(meta).count(1).build());
         return new int[]{newItem.getDefinition().getRuntimeId(), newItem.getDamage()};
     }
 
-    public ItemData translateItemData(boolean hashedBlockIds, int input, int output, ItemData itemData) {
+    public ItemData translateItemData(OuranosSession session, int input, int output, ItemData itemData) {
         if (itemData.isNull() || !itemData.isValid()) {
             return itemData;
         }
@@ -63,11 +65,13 @@ public class TypeConverter {
         translatedMeta = (Integer) rawData[1];
 
         if (itemData.getBlockDefinition() != null) {
-            var inputDict = BlockStateDictionary.getInstance(input);
-            var outputDict = BlockStateDictionary.getInstance(output);
+            final BlockDictionaryStorage storage = session.get(BlockDictionaryStorage.class);
+
+            var inputDict = storage.get(input);
+            var outputDict = storage.get(output);
 
             Integer hash = itemData.getBlockDefinition().getRuntimeId();
-            if (!hashedBlockIds) {
+            if (!session.isHashedBlockIds()) {
                 hash = inputDict.toLatestStateHash(itemData.getBlockDefinition().getRuntimeId());
             }
             var inputState = inputDict.lookupStateFromStateHash(hash);
@@ -90,11 +94,11 @@ public class TypeConverter {
     }
 
     @SneakyThrows
-    public int rewriteFullChunk(boolean idAreHashes, int input, int output, ByteBuf from, ByteBuf to, int dimension, int sections) throws ChunkRewriteException {
+    public int rewriteFullChunk(OuranosSession session, int input, int output, ByteBuf from, ByteBuf to, int dimension, int sections) throws ChunkRewriteException {
         var subChunks = new ArrayList<ByteBuf>();
         for (var section = 0; section < sections; section++) {
             var buf = ByteBufAllocator.DEFAULT.buffer();
-            rewriteSubChunk(idAreHashes, input, output, from, buf);
+            rewriteSubChunk(session, input, output, from, buf);
             subChunks.add(buf);
         }
         var allSubChunks = new ArrayList<>(subChunks);
@@ -220,7 +224,7 @@ public class TypeConverter {
         };
     }
 
-    public static void rewriteSubChunk(boolean idAreHashes, int input, int output, ByteBuf from, ByteBuf to) throws ChunkRewriteException {
+    public static void rewriteSubChunk(OuranosSession session, int input, int output, ByteBuf from, ByteBuf to) throws ChunkRewriteException {
         var version = from.readUnsignedByte();
         var isNineSubChunkSupported = output >= Bedrock_v465.CODEC.getProtocolVersion();
         if (!isNineSubChunkSupported && version == 9) {
@@ -231,7 +235,7 @@ public class TypeConverter {
         switch (version) {
             case 0, 4, 139 -> to.writeBytes(from, 4096 + 2048);
             case 1 ->
-                    PaletteStorage.translatePaletteStorage(input, output, from, to, (i, o, v) -> translateBlockRuntimeId(idAreHashes, i, o, v));
+                    PaletteStorage.translatePaletteStorage(input, output, from, to, (i, o, v) -> translateBlockRuntimeId(session, i, o, v));
             case 8, 9 -> { // New form chunk, baked-in palette
                 var storageCount = from.readUnsignedByte();
                 to.writeByte(storageCount);
@@ -242,7 +246,7 @@ public class TypeConverter {
                     }
                 }
                 for (var storage = 0; storage < storageCount; storage++) {
-                    PaletteStorage.translatePaletteStorage(input, output, from, to, (i, o, v) -> translateBlockRuntimeId(idAreHashes, i, o, v));
+                    PaletteStorage.translatePaletteStorage(input, output, from, to, (i, o, v) -> translateBlockRuntimeId(session, i, o, v));
                 }
             }
             default -> // Unsupported
@@ -250,13 +254,15 @@ public class TypeConverter {
         }
     }
 
-    public int translateBlockRuntimeId(boolean idAreHashes, int input, int output, int blockRuntimeId) {
-        val inputDict = BlockStateDictionary.getInstance(input);
-        val outputDict = BlockStateDictionary.getInstance(output);
+    public int translateBlockRuntimeId(OuranosSession session, int input, int output, int blockRuntimeId) {
+        final BlockDictionaryStorage storage = session.get(BlockDictionaryStorage.class);
 
-        boolean outputHashes = idAreHashes && output >= Bedrock_v582.CODEC.getProtocolVersion();
+        val inputDict = storage.get(input);
+        val outputDict = storage.get(output);
 
-        BlockStateDictionary.Dictionary.BlockEntry entry = idAreHashes ? inputDict.toBlockStateHash(blockRuntimeId) : inputDict.toBlockState(blockRuntimeId);
+        boolean outputHashes = session.isHashedBlockIds() && output >= Bedrock_v582.CODEC.getProtocolVersion();
+
+        BlockStateDictionary.Dictionary.BlockEntry entry = session.isHashedBlockIds() ? inputDict.toBlockStateHash(blockRuntimeId) : inputDict.toBlockState(blockRuntimeId);
         if (entry == null) {
             return outputHashes ? -2 : outputDict.getFallbackRuntimeId();
         }
@@ -273,8 +279,8 @@ public class TypeConverter {
         return translated == null ? outputDict.getFallbackRuntimeId() : translated;
     }
 
-    public BlockDefinition translateBlockDefinition(boolean hashed, int input, int output, BlockDefinition definition) {
-        return new SimpleBlockDefinition(translateBlockRuntimeId(hashed, input, output, definition.getRuntimeId()));
+    public BlockDefinition translateBlockDefinition(OuranosSession session, int input, int output, BlockDefinition definition) {
+        return new SimpleBlockDefinition(translateBlockRuntimeId(session, input, output, definition.getRuntimeId()));
     }
 
 //    public ItemDescriptor translateItemDescriptor(int input, int output, ItemDescriptor descriptor) {
