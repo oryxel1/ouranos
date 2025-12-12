@@ -9,6 +9,7 @@ import org.cloudburstmc.nbt.NbtList;
 import org.cloudburstmc.nbt.NbtMap;
 import org.cloudburstmc.nbt.NbtMapBuilder;
 import org.cloudburstmc.nbt.NbtType;
+import org.cloudburstmc.protocol.bedrock.codec.v419.Bedrock_v419;
 import org.cloudburstmc.protocol.bedrock.data.BlockPropertyData;
 
 import java.nio.charset.StandardCharsets;
@@ -22,7 +23,7 @@ public class BlockDictionaryStorage extends OuranosStorage {
     public BlockDictionaryStorage(OuranosSession user, List<BlockPropertyData> properties) {
         super(user);
 
-        if (properties.isEmpty()) {
+        if (properties.isEmpty() || user.getProtocolId() < Bedrock_v419.CODEC.getProtocolVersion()) {
             serverDictionary = BlockStateDictionary.getInstance(user.getTargetVersion());
             clientDictionary = BlockStateDictionary.getInstance(user.getProtocolId());
         } else {
