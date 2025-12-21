@@ -4,9 +4,9 @@
 [versions]
 cn-hutool-hutool-core = "5.8.40"
 com-google-code-gson-gson = "2.13.2"
-org-allaymc-stateupdater-block-updater = "1.21.60-R3"
+org-allaymc-stateupdater-block-updater = "1.21.110-R1"
 org-allaymc-stateupdater-common = "0.1.1"
-org-cloudburstmc-protocol-bedrock-connection = "3.0.0.Beta9-SNAPSHOT"
+org-cloudburstmc-protocol-bedrock-connection = "3.0.0.Beta11-SNAPSHOT"
 org-projectlombok-lombok = "1.18.42"
 
 [libraries]

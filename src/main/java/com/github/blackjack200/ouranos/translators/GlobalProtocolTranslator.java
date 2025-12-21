@@ -134,9 +134,9 @@ public class GlobalProtocolTranslator extends ProtocolToProtocol {
                 }
             }
 
-            final Set<EntityFlag> flags = newMetadata.getFlags();
+            final EnumMap<EntityFlag, Boolean> flags = newMetadata.getFlags();
             if (flags != null) {
-                flags.removeIf(flag -> storage.getFlags().getIdUnsafe(flag) == -1 && storage.getFlags_2().getIdUnsafe(flag) == -1);
+                flags.keySet().removeIf(flag -> storage.getFlags().getIdUnsafe(flag) == -1 && storage.getFlags_2().getIdUnsafe(flag) == -1);
             }
         } catch (Exception exception) {
             return metadata;
