@@ -25,7 +25,7 @@ public class BiomeDefinitionDataBean {
     public BiomeDefinitionData toData() {
         BiomeDefinitions defs = new BiomeDefinitions(new HashMap<>());
 
-        return new BiomeDefinitionData(this.id != null ? new Unindexed<>(this.id):null, this.temperature, this.downfall, this.redSporeDensity, this.blueSporeDensity, this.ashDensity, this.whiteAshDensity, this.depth, this.scale, this.mapWaterColour.toColor(), this.rain, new UnindexedList<>(this.tags), null);
+        return new BiomeDefinitionData(Integer.valueOf(id), this.temperature, this.downfall, this.redSporeDensity, this.blueSporeDensity, this.ashDensity, this.whiteAshDensity, this.depth, this.scale, this.mapWaterColour.toColor(), this.rain, new UnindexedList<>(this.tags), null);
     }
 }
 

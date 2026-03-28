@@ -81,6 +81,11 @@ import org.cloudburstmc.protocol.bedrock.codec.v818.Bedrock_v818;
 import org.cloudburstmc.protocol.bedrock.codec.v819.Bedrock_v819;
 import org.cloudburstmc.protocol.bedrock.codec.v827.Bedrock_v827;
 import org.cloudburstmc.protocol.bedrock.codec.v844.Bedrock_v844;
+import org.cloudburstmc.protocol.bedrock.codec.v859.Bedrock_v859;
+import org.cloudburstmc.protocol.bedrock.codec.v860.Bedrock_v860;
+import org.cloudburstmc.protocol.bedrock.codec.v898.Bedrock_v898;
+import org.cloudburstmc.protocol.bedrock.codec.v924.Bedrock_v924;
+import org.cloudburstmc.protocol.bedrock.codec.v944.Bedrock_v944;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -94,7 +99,16 @@ public final class ProtocolInfo {
     }
 
     static {
+        // 1.26.x
+        addPacketCodec(Bedrock_v944.CODEC, 251);
+        addPacketCodec(Bedrock_v924.CODEC, 251);
+
         // 1.21.x
+        addPacketCodec(Bedrock_v898.CODEC, 251);
+        addPacketCodec(Bedrock_v860.CODEC, 251);
+        addPacketCodec(Bedrock_v859.CODEC, 251);
+        addPacketCodec(Bedrock_v844.CODEC, 251);
+
         addPacketCodec(Bedrock_v844.CODEC, 241, new Protocol844to827(), null);
         addPacketCodec(Bedrock_v827.CODEC, 241);
         addPacketCodec(Bedrock_v819.CODEC, 231);
